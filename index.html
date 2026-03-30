@@ -1719,7 +1719,8 @@ function renderRVMDetail(r){
     <div class="det-row"><span class="det-k">Contact</span><span class="det-v">${h(r.contact_name||'—')}</span></div>
     ${r.contact_phone?`<div class="det-row"><span class="det-k">Phone</span><span class="det-v"><a href="tel:+91${h((r.contact_phone||'').replace(/\D/g,''))}" style="color:var(--teal-d)">${h(r.contact_phone)}</a></span></div>`:''}`;
   const ns=document.getElementById('d-notes-sec');
-  if(r.notes){ns.style.display='block';document.getElementById('d-notes').textContent=r.notes;}else ns.style.display='none';
+  const combinedNotes=[r.notes,r.meeting_notes].filter(Boolean).join(' · ');
+  if(combinedNotes){ns.style.display='block';document.getElementById('d-notes').textContent=combinedNotes;}else ns.style.display='none';
   // Activity log from updates
   const actSec=document.getElementById('d-activity-sec');
   const actEl=document.getElementById('d-activity');
@@ -2747,6 +2748,11 @@ function normRow(r){
     agreement_signed:     g('agreement_signed','Agreement Signed','④ Agreement Signed'),
     planned_install_date: g('planned_install_date','Planned Install Date','Planned for Installation','install_date','⑤ Planned'),
     rvm_installed:        g('rvm_installed','RVM Installed','⑥ RVM Installed'),
+    // Reschedule & notes columns (from sheet)
+    delay_reasons:        g('delay_reasons','Delay Reasons','Delay'),
+    reschedule_date:      g('reschedule_date','Reschedule Date','Rescheduled Date'),
+    last_updated_by:      g('last_updated_by','Last Updated By','Updated By'),
+    meeting_notes:        g('meeting_notes','Meeting Notes','Notes'),
   };
 }
 function normName(s){return(s||'').trim().toLowerCase().replace(/[àáâãä]/g,'a').replace(/[èéê]/g,'e').replace(/[ç]/g,'c');}
@@ -2767,6 +2773,35 @@ function loadData(rows){
     const ops=[...new Set(DATA.map(r=>r.operator).filter(Boolean))].sort();
     opSel.innerHTML='<option value="">All Operators</option>'+ops.map(o=>`<option value="${h(o)}">${h(o)}</option>`).join('');
   }
+  // Convert sheet columns → LOCAL update history so Reschedule Tracker works
+  rows.forEach(r=>{
+    const hasSheetNote=r.meeting_notes||r.delay_reasons||r.reschedule_date||r.last_updated_by;
+    if(!hasSheetNote) return;
+    if(!LOCAL[r.rvm_id]) LOCAL[r.rvm_id]={};
+    if(!LOCAL[r.rvm_id].updates) LOCAL[r.rvm_id].updates=[];
+    // Only inject if no existing update for this RVM (don't overwrite manual entries)
+    const alreadyHasSheetEntry=LOCAL[r.rvm_id].updates.some(u=>u._fromSheet);
+    if(alreadyHasSheetEntry) return;
+    const reasons=r.delay_reasons?r.delay_reasons.split('|').map(s=>s.trim()).filter(Boolean):[];
+    const s=stageOf(r);
+    LOCAL[r.rvm_id].updates.push({
+      stage:s.label,
+      date:r.reschedule_date||r.planned_install_date||r.agreement_signed||r.noc_received||r.info_shared||'',
+      notes:r.meeting_notes||'',
+      by:r.last_updated_by||'',
+      delayReasons:reasons,
+      delayReschedule:r.reschedule_date||'',
+      origDate:r.planned_install_date||'',
+      ts:new Date().toISOString(),
+      _fromSheet:true
+    });
+    if(reasons.length) LOCAL[r.rvm_id].delayReasons=reasons;
+    if(r.reschedule_date){
+      LOCAL[r.rvm_id].delayReschedule=r.reschedule_date;
+      // Update planned date if reschedule_date is set
+      if(r.reschedule_date&&!r.rvm_installed) r.planned_install_date=r.reschedule_date;
+    }
+  });
   if(curTab==='map'&&mapReady){updatePolyStyles();drawMarkers();renderMapPList();renderMapStageFilter();}
   else if(curTab==='pipeline'){renderPipelineStageTabs();renderPipeline();}
   else if(curTab==='schedule') renderSchedule();
@@ -2815,21 +2850,124 @@ function genDemo(){
     if(stage>=3){r.agreement_signed=rd(d,5);d-=Math.floor(Math.random()*10+4);}
     if(stage>=4){r.planned_install_date=stage===4?futDate():rd(d,5);d-=Math.floor(Math.random()*8+3);}
     if(stage>=5){r.rvm_installed=rd(d,5);}
-    // Inject reschedule history for some planned/overdue RVMs (~15%)
-    if(stage>=4&&Math.random()<0.15){
-      const reasons=[['Site not ready','Space conflict'],['Owner unavailable'],['Transport delay','Machine not ready'],['NOC issue'],['Permission withdrawn','Renegotiating'],['Power unavailable']];
-      const dr=reasons[Math.floor(Math.random()*reasons.length)];
-      const orig=r.planned_install_date;
-      const newD=new Date(orig);newD.setDate(newD.getDate()+Math.floor(Math.random()*20+5));
-      const newDs=newD.toISOString().slice(0,10);
-      r.planned_install_date=newDs;
-      // Store in LOCAL so renderRescheduleTracker picks it up
+    // ── Inject rich update history into LOCAL ──
+    // Names used for updates
+    const _names=['Ash Kumar','Priya Dessai','Rajesh Naik','Carlos Pereira','Mohan Kamat'];
+    const _nm=()=>_names[Math.floor(Math.random()*_names.length)];
+    const _ts=(daysAgo)=>{const d=new Date();d.setDate(d.getDate()-daysAgo);return d.toISOString();};
+    const _doff=(dateStr,days)=>{const d=new Date(dateStr);d.setDate(d.getDate()+days);return d.toISOString().slice(0,10);};
+
+    // Meeting notes for NOC stage (30% of NOC+ RVMs)
+    if(stage>=2&&Math.random()<0.30){
       if(!LOCAL[r.rvm_id])LOCAL[r.rvm_id]={};
       if(!LOCAL[r.rvm_id].updates)LOCAL[r.rvm_id].updates=[];
-      LOCAL[r.rvm_id].updates.push({stage:STAGES[4].label,date:orig,notes:'',by:'System',delayReasons:dr,delayReschedule:newDs,ts:new Date().toISOString()});
-      LOCAL[r.rvm_id].delayReasons=dr;
-      LOCAL[r.rvm_id].delayReschedule=newDs;
+      const nocNotes=[
+        'Met with sarpanch and secretary. NOC application submitted. Resolution passed in gram sabha.',
+        'Panchayat office visit done. Documents verified. NOC issued after minor corrections.',
+        'Follow-up meeting with panchayat. All paperwork complete, NOC handed over.',
+        'Coordination with GWMA field officer. NOC process smooth, no objections raised.',
+      ];
+      LOCAL[r.rvm_id].updates.push({
+        stage:STAGES[2].label,date:r.noc_received,
+        notes:nocNotes[Math.floor(Math.random()*nocNotes.length)],
+        by:_nm(),delayReasons:[],delayReschedule:'',
+        ts:_ts(Math.floor(Math.random()*30+20))
+      });
     }
+
+    // Meeting notes for Agreement stage (40% of Agreement+ RVMs)
+    if(stage>=3&&Math.random()<0.40){
+      if(!LOCAL[r.rvm_id])LOCAL[r.rvm_id]={};
+      if(!LOCAL[r.rvm_id].updates)LOCAL[r.rvm_id].updates=[];
+      const agrNotes=[
+        'Agreement signed by owner. Discussed placement near entrance. Space confirmed — 4x4 ft available.',
+        'Owner meeting done. Revenue share explained. Agreement executed. Deposit amount agreed.',
+        'Site visit + agreement signing. Owner keen, wants installation before festival season.',
+        'All terms finalised. Agreement signed. Owner will arrange electrician for power connection.',
+        'Second meeting needed — owner wanted legal review. Agreement signed after 3 days.',
+      ];
+      LOCAL[r.rvm_id].updates.push({
+        stage:STAGES[3].label,date:r.agreement_signed,
+        notes:agrNotes[Math.floor(Math.random()*agrNotes.length)],
+        by:_nm(),delayReasons:[],delayReschedule:'',
+        ts:_ts(Math.floor(Math.random()*20+10))
+      });
+    }
+
+    // Reschedule + delay reasons for Planned RVMs (50% of planned, was 15%)
+    if(stage>=4&&Math.random()<0.50){
+      if(!LOCAL[r.rvm_id])LOCAL[r.rvm_id]={};
+      if(!LOCAL[r.rvm_id].updates)LOCAL[r.rvm_id].updates=[];
+      const delayScenarios=[
+        {reasons:['Site not ready','Power unavailable'],   note:'Site visit done — electrical work incomplete. Contractor to finish by next week. Rescheduled installation.'},
+        {reasons:['Owner unavailable'],                    note:'Owner travelling to Pune for 2 weeks. Confirmed rescheduled date over call.'},
+        {reasons:['Transport delay','Machine not ready'],  note:'RVM unit held at warehouse — QC check pending. Logistics team to confirm dispatch date.'},
+        {reasons:['Space conflict'],                       note:'Existing shelf at planned location needs to be moved. Owner arranging relabeling this week.'},
+        {reasons:['Contractor unavailable'],               note:'Installation team unavailable due to prior commitment. New slot confirmed with contractor.'},
+        {reasons:['NOC issue'],                            note:'Panchayat requested updated NOC with revised coordinates. Submitted, awaiting re-approval.'},
+        {reasons:['Permission withdrawn'],                 note:'Owner reconsidering after neighbour objected. Follow-up meeting scheduled.'},
+        {reasons:['Panchayat objection'],                  note:'Panchayat member raised concern about placement near temple. Alternative site being evaluated.'},
+        {reasons:['Machine not ready','Transport delay'],  note:'Machine QC failed initial check — being repaired at depot. New dispatch in 10 days.'},
+        {reasons:['Owner unavailable','Renegotiating'],    note:'Owner wants revised revenue terms. Legal team reviewing. Installation on hold.'},
+      ];
+      const scenario=delayScenarios[Math.floor(Math.random()*delayScenarios.length)];
+      const origDate=r.planned_install_date;
+      const daysDelay=Math.floor(Math.random()*21+7); // 7-28 days delay
+      const newDate=_doff(origDate,daysDelay);
+      r.planned_install_date=newDate;
+
+      // First reschedule entry
+      LOCAL[r.rvm_id].updates.push({
+        stage:STAGES[4].label,date:origDate,origDate:origDate,
+        notes:scenario.note,
+        by:_nm(),delayReasons:scenario.reasons,delayReschedule:newDate,
+        ts:_ts(Math.floor(Math.random()*14+3))
+      });
+      LOCAL[r.rvm_id].delayReasons=scenario.reasons;
+      LOCAL[r.rvm_id].delayReschedule=newDate;
+
+      // 25% chance of a second reschedule (rescheduled again)
+      if(Math.random()<0.25){
+        const secondScenarios=[
+          {reasons:['Site not ready'],         note:'Electrical work still not done. Contractor gave new date. Rescheduling again.'},
+          {reasons:['Owner unavailable'],      note:'Owner trip extended. Will be back next month. New date confirmed.'},
+          {reasons:['Transport delay'],        note:'RVM unit damaged in transit. Replacement being arranged from depot.'},
+          {reasons:['Contractor unavailable'], note:'Contractor had a medical emergency. New team being assigned.'},
+        ];
+        const s2=secondScenarios[Math.floor(Math.random()*secondScenarios.length)];
+        const orig2=newDate;
+        const newDate2=_doff(orig2,Math.floor(Math.random()*14+5));
+        r.planned_install_date=newDate2;
+        LOCAL[r.rvm_id].updates.push({
+          stage:STAGES[4].label,date:orig2,origDate:orig2,
+          notes:s2.note,
+          by:_nm(),delayReasons:s2.reasons,delayReschedule:newDate2,
+          ts:_ts(Math.floor(Math.random()*5+1))
+        });
+        LOCAL[r.rvm_id].delayReasons=s2.reasons;
+        LOCAL[r.rvm_id].delayReschedule=newDate2;
+      }
+    }
+
+    // Installation notes for installed RVMs (60%)
+    if(stage>=5&&Math.random()<0.60){
+      if(!LOCAL[r.rvm_id])LOCAL[r.rvm_id]={};
+      if(!LOCAL[r.rvm_id].updates)LOCAL[r.rvm_id].updates=[];
+      const instNotes=[
+        'RVM installed successfully. Tested with 10 bottles — working fine. Staff trained on operation.',
+        'Installation complete. Machine connected to power. QR codes affixed. Handover done to owner.',
+        'Smooth installation. Location well-chosen. Owner very cooperative. Trial run successful.',
+        'Installation done. Minor adjustment to placement needed — done on site. Machine operational.',
+        'RVM live. Owner trained. Promotional material put up. First collection scheduled for next week.',
+      ];
+      LOCAL[r.rvm_id].updates.push({
+        stage:STAGES[5].label,date:r.rvm_installed,
+        notes:instNotes[Math.floor(Math.random()*instNotes.length)],
+        by:_nm(),delayReasons:[],delayReschedule:'',
+        ts:_ts(Math.floor(Math.random()*5))
+      });
+    }
+
     return r;
   });
 }
