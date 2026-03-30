@@ -1714,6 +1714,7 @@ function renderRVMDetail(r){
     <div class="det-row"><span class="det-k">Panchayat</span><span class="det-v">${h(r.panchayat)}</span></div>
     <div class="det-row"><span class="det-k">Taluka</span><span class="det-v">${h(r.taluka)}</span></div>
     <div class="det-row"><span class="det-k">Type</span><span class="det-v">${h(r.location_type||'—')}</span></div>
+    <div class="det-row"><span class="det-k">Area Type</span><span class="det-v">${h(r.area_type||'—')}</span></div>
     <div class="det-row"><span class="det-k">Operator</span><span class="det-v">${h(r.operator||'—')}</span></div>`;
   document.getElementById('d-contact').innerHTML=`
     <div class="det-row"><span class="det-k">Contact</span><span class="det-v">${h(r.contact_name||'—')}</span></div>
@@ -2485,7 +2486,7 @@ function renderPipeline(){
         <div class="plcard-body">
           <div class="plcard-id">${h(r.rvm_id)}</div>
           <div class="plcard-name">${h(r.location_name)}</div>
-          <div class="plcard-sub">${h(r.panchayat)} · ${h(r.taluka)} · ${h(r.operator||'—')}</div>
+          <div class="plcard-sub">${h(r.panchayat)} · ${h(r.taluka)} · ${h(r.area_type||r.location_type||'—')} · ${h(r.operator||'—')}</div>
           ${(()=>{const upds=(LOCAL[r.rvm_id]||{}).updates||[];const last=upds.slice().reverse().find(u=>u.notes);return last?`<div style="font-size:10px;color:var(--ink4);margin-top:3px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px">💬 ${h(last.notes)}</div>`:'';})()}
         </div>
         <div class="plcard-right">
@@ -2733,6 +2734,7 @@ function normRow(r){
     taluka:        g('taluka','Taluka'),
     location_name: g('location_name','Location Name','location'),
     location_type: g('location_type','Location Type','type'),
+    area_type:     g('area_type','Area Type','area'),
     operator:      g('operator','Operator'),
     contact_name:  g('contact_name','Contact Name','contact'),
     contact_phone: g('contact_phone','Contact Phone','phone'),
