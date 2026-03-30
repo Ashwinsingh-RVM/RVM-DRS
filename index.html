@@ -474,6 +474,29 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
   /* App takes full height minus top + bottom nav */
   #app{height:calc(100dvh - var(--top) - var(--bot));margin-bottom:var(--bot)}
 
+  /* ── General mobile improvements ── */
+  .det-h{font-size:13px}
+  .det-row{font-size:12px;padding:6px 0}
+  .det-k{font-size:11px}
+  .det-v{font-size:12px}
+  .ptl-lbl{font-size:12px}
+  .ptl-date{font-size:11px}
+  .fbtn{padding:12px;font-size:13px}
+  .fi{font-size:14px;padding:10px}
+  .fsel{font-size:14px;padding:10px}
+  .fl{font-size:10px}
+  .hist-note{font-size:12px;line-height:1.6}
+  .hist-stage-pill{font-size:11px}
+  .hist-by{font-size:11px}
+  .hist-date{font-size:10px}
+  .dchip{font-size:11px;padding:7px 12px}
+  .dcat-lbl{font-size:10px;width:72px}
+  #upd-hist .hist-card{padding:12px 14px}
+  /* Map mobile */
+  #map-chip{font-size:12px;padding:6px 12px}
+  #chip-title{font-size:13px;font-weight:700}
+  #chip-sub{font-size:11px}
+
   /* ── OVERVIEW mobile ── */
   #v-overview .ov{padding:12px}
   .kpi-grid{grid-template-columns:repeat(3,1fr);gap:8px}
@@ -662,6 +685,10 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
   <div class="tsp"></div>
   <button id="upload-btn" onclick="document.getElementById('overlay').style.display='flex'">⬆ Load Data</button>
   <span id="last-updated"></span><div id="sync-badge"><div class="sdot"></div><span id="sync-txt">No data</span></div>
+<div id="sheet-indicator" style="display:none;align-items:center;gap:5px;padding:4px 9px;border-radius:16px;background:var(--teal-l);border:1px solid rgba(13,148,136,.25);font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--teal-d);flex-shrink:0;margin-left:6px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" title="Click to change sheet" onclick="document.getElementById('overlay').style.display='flex'">
+  <span style="flex-shrink:0">📊</span>
+  <span id="sheet-name-display" style="overflow:hidden;text-overflow:ellipsis">Sheet connected</span>
+</div>
 </div>
 
 <!-- MOBILE BOTTOM NAV -->
@@ -880,10 +907,7 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
       </select>
     </div>
     <div class="map-stage-filter" id="map-stage-filter"></div>
-    <div style="padding:10px 12px;border-bottom:1px solid var(--line);flex-shrink:0">
-      <div class="ml-lbl" style="margin-bottom:6px">Map Legend</div>
-      <div id="map-legend-sidebar"></div>
-    </div>
+
     <div id="map-search-wrap">
       <span class="map-srch-ic">🔍</span>
       <input id="map-search" type="text" placeholder="Type RVM ID (e.g. GOA-RVM-042) or panchayat…" oninput="renderMapPList()" autocomplete="off" spellcheck="false">
@@ -1054,6 +1078,10 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
   <div id="sch-header">
     <h2>Installation Schedule</h2>
     <div class="sch-filter-row">
+      <div style="position:relative;flex:1;max-width:220px">
+        <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none">🔍</span>
+        <input class="sch-date-inp" id="sch-search" type="text" oninput="renderSchedule()" placeholder="RVM ID or panchayat…" autocomplete="off" style="padding-left:26px;width:100%">
+      </div>
       <input class="sch-date-inp" id="sch-from" type="date" onchange="renderSchedule()" placeholder="From">
       <span style="color:var(--ink4);font-size:12px">→</span>
       <input class="sch-date-inp" id="sch-to" type="date" onchange="renderSchedule()" placeholder="To">
@@ -1589,7 +1617,13 @@ function renderMapStageFilter(){
   });
   el.innerHTML=html;
 }
-function setMapStage(k){mapStage=k;renderMapStageFilter();renderMapPList();updatePolyStyles();drawMarkers();}
+function setMapStage(k){
+  mapStage=k;
+  renderMapStageFilter();
+  updatePolyStyles();
+  drawMarkers();
+  renderMapPList();
+}
 
 function onTalukaChange(){
   curTaluka=document.getElementById('ml-taluka').value;
@@ -1623,7 +1657,23 @@ function selectRVM(id){
   } else {
     renderRVMDetail(r);
   }
-  if(curTab==='map'){drawMarkers();renderMapPList();}
+  if(curTab==='map'){
+    drawMarkers();
+    renderMapPList();
+    // Fly map to selected RVM marker
+    flyToRVM(r);
+  }
+}
+
+function flyToRVM(r){
+  if(!map||!r) return;
+  // Use RVM's own lat/lng if set, otherwise use panchayat centroid
+  let lat=r.lat?+r.lat:0, lng=r.lng?+r.lng:0;
+  if(!lat||!lng){
+    const feat=GEO?.features.find(f=>normName(f.properties.name)===normName(r.panchayat));
+    lat=+(feat?.properties?.lat||0); lng=+(feat?.properties?.lng||0);
+  }
+  if(lat&&lng) map.flyTo([lat,lng],16,{duration:.6});
 }
 
 function showMRTabs(){document.getElementById('mr-tabs').style.display='flex';document.getElementById('mr-empty').style.display='none';}
@@ -2522,10 +2572,11 @@ function quickUpdate(id){
 function renderSchedule(){
   const from=document.getElementById('sch-from')?.value||'';
   const to=document.getElementById('sch-to')?.value||'';
-  // Only show NOC-received and beyond that have a planned_install_date (not yet installed or recently installed)
+  const sq=(document.getElementById('sch-search')?.value||'').trim().toLowerCase();
   let rows=DATA.filter(r=>r.planned_install_date||r.rvm_installed);
   if(from) rows=rows.filter(r=>(r.planned_install_date||r.rvm_installed)>=from);
   if(to)   rows=rows.filter(r=>(r.planned_install_date||r.rvm_installed)<=to);
+  if(sq)   rows=rows.filter(r=>r.rvm_id.toLowerCase().includes(sq)||normName(r.panchayat).includes(sq)||r.location_name.toLowerCase().includes(sq)||r.taluka.toLowerCase().includes(sq));
   // Group by date
   const grp={};
   rows.forEach(r=>{
@@ -2560,13 +2611,16 @@ function renderSchedule(){
       </div>
       <div class="sch-cards">${dayRows.map(r=>{
         const s=stageOf(r);const isInst=!!r.rvm_installed;
-        return`<div class="sch-card">
-          <div class="sch-card-id">${h(r.rvm_id)}</div>
+        return`<div class="sch-card" onclick="switchTab('map');selectRVM('${esc(r.rvm_id)}')" style="cursor:pointer" title="Click to view on map">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+            <span class="sch-card-id">${h(r.rvm_id)}</span>
+            <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:${isInst?'var(--green-l)':s.lhex};color:${isInst?'var(--green)':s.hex}">${isInst?'✅ Installed':s.num+' '+h(s.label)}</span>
+          </div>
           <div class="sch-card-name">${h(r.location_name)}</div>
           <div class="sch-card-loc">${h(r.panchayat)} · ${h(r.taluka)}</div>
           <div class="sch-card-btm">
             <span class="sch-card-op">${h(r.operator||'—')}</span>
-            <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:${isInst?'var(--green-l)':s.lhex};color:${isInst?'var(--green)':s.hex}">${isInst?'✅ Installed':s.num+' '+h(s.label)}</span>
+            <span style="font-size:9px;color:var(--ink4)">→ tap to view</span>
           </div>
         </div>`;
       }).join('')}</div>
@@ -2576,6 +2630,7 @@ function renderSchedule(){
 function clearSchFilter(){
   document.getElementById('sch-from').value='';
   document.getElementById('sch-to').value='';
+  const ss=document.getElementById('sch-search');if(ss)ss.value='';
   renderSchedule();
 }
 
@@ -2723,6 +2778,18 @@ function setSyncStatus(s,msg){const b=document.getElementById('sync-badge');b.cl
 // ════════════════════════════════
 // DEMO DATA (correct flow)
 // ════════════════════════════════
+function showSheetIndicator(url){
+  const ind=document.getElementById('sheet-indicator');
+  const nameEl=document.getElementById('sheet-name-display');
+  if(!ind||!nameEl) return;
+  // Extract sheet name from URL or use short ID
+  const m=url.match(/\/d\/([a-zA-Z0-9_-]{6,})/);
+  const id=m?m[1].slice(0,12)+'…':'Sheet';
+  nameEl.textContent='📊 '+id;
+  ind.title='Connected: '+url+' (click to reconnect)';
+  ind.style.display='flex';
+}
+
 function loadDemo(){loadData(genDemo());}
 function genDemo(){
   const T=['Bardez','Tiswadi','Pernem','Bicholim','Satari','Ponda','Salcete','Mormugao','Quepem','Sanguem','Canacona'];
@@ -2795,7 +2862,11 @@ async function connectGS(){
   if(!raw||!raw.includes('google.com')){showErr('Paste a Google Sheet URL');return;}
   const btn=document.getElementById('gsbtn');btn.textContent='Connecting…';btn.disabled=true;
   let lastErr='';
-  for(const url of buildUrls(raw)){try{const csv=await tryFetch(url);const p=parseCSV(csv);if(!p.length){lastErr='No valid rows — tab must be "RVM Pipeline"';continue;}if(/^https:\/\/docs\.google\.com\//i.test(url))localStorage.setItem('rvm_pipe_v3',url);loadData(p);btn.textContent='Connect →';btn.disabled=false;return;}catch(e){lastErr=e.message;}}
+  for(const url of buildUrls(raw)){try{const csv=await tryFetch(url);const p=parseCSV(csv);if(!p.length){lastErr='No valid rows — tab must be "RVM Pipeline"';continue;}if(/^https:\/\/docs\.google\.com\//i.test(url))localStorage.setItem('rvm_pipe_v3',url);
+        loadData(p);
+        // Show sheet indicator
+        showSheetIndicator(raw);
+        btn.textContent='Connect →';btn.disabled=false;return;}catch(e){lastErr=e.message;}}
   btn.textContent='Connect Google Sheet →';btn.disabled=false;
   showErr(`Failed: ${lastErr}
 
@@ -2808,6 +2879,7 @@ Share sheet → Anyone with link → Viewer.`);
 (()=>{
   loadGeo();
   if(SHEET_URL&&/^https:\/\/docs\.google\.com\//i.test(SHEET_URL)){
+    showSheetIndicator(SHEET_URL);
     document.getElementById('gsurl').value=SHEET_URL.replace(/\/gviz.*/,'/edit');
     tryFetch(SHEET_URL).then(csv=>{const p=parseCSV(csv);if(p.length)loadData(p);else setSyncStatus('err','Could not reload');}).catch(()=>setSyncStatus('err','Could not reload'));
   }
