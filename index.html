@@ -112,7 +112,7 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(
 .funnel-wrap{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
 .funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
 .funnel-row:last-child{margin-bottom:0}
-.funnel-lbl{font-size:11px;font-weight:600;color:var(--ink2);width:200px;flex-shrink:0;display:flex;align-items:center;gap:7px}
+.funnel-lbl{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ink2);width:150px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .funnel-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .funnel-track{flex:1;height:30px;background:var(--bg3);border-radius:7px;overflow:hidden;position:relative}
 .funnel-fill{height:100%;border-radius:7px;display:flex;align-items:center;padding-left:10px;transition:width .7s cubic-bezier(.4,0,.2,1)}
@@ -462,6 +462,7 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
 #mob-overlay.on{display:block}
 
 @media(max-width:768px){
+  #map-legend{display:none!important}
   /* Hide desktop nav, show mobile nav */
   #nav{display:none}
   #top{padding:0 12px;height:var(--top)}
@@ -474,6 +475,12 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
   /* App takes full height minus top + bottom nav */
   #app{height:calc(100dvh - var(--top) - var(--bot));margin-bottom:var(--bot)}
 
+  /* ── Funnel mobile ── */
+  .funnel-row{flex-wrap:wrap;gap:3px}
+  .funnel-lbl{width:100%;font-size:10px;max-width:none}
+  .funnel-track{min-width:80px}
+  .funnel-cnt{display:none}
+  .funnel-pct,.funnel-conv{font-size:10px}
   /* ── General mobile improvements ── */
   .det-h{font-size:13px}
   .det-row{font-size:12px;padding:6px 0}
@@ -657,6 +664,25 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
 .hist-reschedule{font-size:10px;font-weight:600;color:var(--amber);margin-top:5px;display:flex;align-items:center;gap:5px}
 .hist-section-title{padding:8px 14px 4px;font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.6px;background:var(--bg3);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
 .hist-count{background:var(--line);color:var(--ink4);font-size:8px;font-weight:700;padding:1px 6px;border-radius:8px}
+/* ── Admin password gate ── */
+#pass-gate{position:fixed;inset:0;background:rgba(15,23,42,.7);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center}
+#pass-box{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:28px;width:340px;box-shadow:0 16px 48px rgba(0,0,0,.18);text-align:center}
+#pass-box h3{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
+#pass-box p{font-size:12px;color:var(--ink3);margin-bottom:18px;line-height:1.5}
+#pass-inp{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:16px;font-family:'Plus Jakarta Sans',sans-serif;text-align:center;letter-spacing:4px;outline:none;margin-bottom:10px;color:var(--ink);background:var(--bg2)}
+#pass-inp:focus{border-color:var(--teal)}
+#pass-inp.err{border-color:var(--red);animation:shake .3s ease}
+#pass-err{font-size:11px;color:var(--red);margin-bottom:10px;min-height:16px}
+#pass-submit{width:100%;padding:10px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+#pass-submit:hover{background:var(--teal-d)}
+#pass-cancel{margin-top:8px;font-size:11px;color:var(--ink4);cursor:pointer;text-decoration:underline;display:block}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* ── Upload spinner overlay ── */
+#upload-spinner{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(3px);z-index:8000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.spin-ring{width:52px;height:52px;border:4px solid rgba(255,255,255,.15);border-top-color:var(--teal);border-radius:50%;animation:spin-anim .75s linear infinite}
+.spin-label{color:#fff;font-size:13px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.1px}
+.spin-sub{color:rgba(255,255,255,.6);font-size:11px;font-family:'Plus Jakarta Sans',sans-serif}
+@keyframes spin-anim{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -683,11 +709,13 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
     <div class="tkpi"><b id="tk-pct" style="color:var(--teal-d)">—</b><small>Done %</small></div>
   </div>
   <div class="tsp"></div>
-  <button id="upload-btn" onclick="document.getElementById('overlay').style.display='flex'">⬆ Load Data</button>
+  <button id="upload-btn" onclick="requireAdmin(()=>document.getElementById('overlay').style.display='flex')">⬆ Load Data</button>
   <span id="last-updated"></span><div id="sync-badge"><div class="sdot"></div><span id="sync-txt">No data</span></div>
-<div id="sheet-indicator" style="display:none;align-items:center;gap:5px;padding:4px 9px;border-radius:16px;background:var(--teal-l);border:1px solid rgba(13,148,136,.25);font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--teal-d);flex-shrink:0;margin-left:6px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" title="Click to change sheet" onclick="document.getElementById('overlay').style.display='flex'">
+<div id="sheet-indicator" style="display:none;align-items:center;gap:4px;padding:3px 8px;border-radius:16px;background:var(--teal-l);border:1px solid rgba(13,148,136,.25);font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--teal-d);flex-shrink:0;margin-left:6px;max-width:220px;white-space:nowrap">
   <span style="flex-shrink:0">📊</span>
-  <span id="sheet-name-display" style="overflow:hidden;text-overflow:ellipsis">Sheet connected</span>
+  <span id="sheet-name-display" style="overflow:hidden;text-overflow:ellipsis;max-width:120px;cursor:pointer" onclick="requireAdmin(()=>document.getElementById('overlay').style.display='flex')" title="Click to change sheet">Sheet connected</span>
+  <span style="opacity:.35;padding:0 1px">·</span>
+  <span style="cursor:pointer;opacity:.6;font-size:10px;font-weight:700" onclick="requireAdmin(disconnectSheet)" title="Disconnect sheet">✕</span>
 </div>
 </div>
 
@@ -1001,11 +1029,14 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
               </div>
             </div>
             <div class="dcat-row">
-              <span class="dcat-lbl" style="color:#92400e">Owner</span>
-              <div class="dchips">
-                <span class="dchip" data-grp="map" data-cat="a" data-reason="Owner unavailable"      onclick="toggleDChip(this)"><span class="dchip-dot"></span>Owner unavailable</span>
-                <span class="dchip" data-grp="map" data-cat="a" data-reason="Permission withdrawn"    onclick="toggleDChip(this)"><span class="dchip-dot"></span>Permission withdrawn</span>
-                <span class="dchip" data-grp="map" data-cat="a" data-reason="Renegotiating"           onclick="toggleDChip(this)"><span class="dchip-dot"></span>Renegotiating</span>
+              <span class="dcat-lbl" style="color:#6d28d9">Other</span>
+              <div class="dchips" style="flex-direction:column;align-items:stretch;gap:6px">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input id="map-other-reason" class="fi" type="text" placeholder="Specify other reason…" style="flex:1;font-size:11px;padding:5px 9px;min-width:0"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();addOtherReason('map');}">
+                  <button onclick="addOtherReason('map')" style="padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit">+ Add</button>
+                </div>
+                <div id="map-other-chips" style="display:flex;flex-wrap:wrap;gap:5px"></div>
               </div>
             </div>
             <div class="dcat-row">
@@ -1150,14 +1181,14 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
     <div class="xldrop" id="xldrop"
       ondragover="event.preventDefault();this.classList.add('drag')"
       ondragleave="this.classList.remove('drag')"
-      ondrop="onDrop(event)"
-      onclick="document.getElementById('xlf').click()">
+      ondrop="requireAdmin(()=>onDrop(event))"
+      onclick="requireAdmin(()=>document.getElementById('xlf').click())">
       <div class="xl-ic">📊</div><h3>Drop Excel / CSV here</h3><p>Click or drag .xlsx or .csv</p>
       <input id="xlf" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="onXLFile(event)">
     </div>
     <div class="or-d">OR</div>
     <input class="oi" id="gsurl" type="text" placeholder="https://docs.google.com/spreadsheets/d/…">
-    <button class="ob ob-p" id="gsbtn" onclick="connectGS()">Connect Google Sheet →</button>
+    <button class="ob ob-p" id="gsbtn" onclick="requireAdmin(connectGS)">Connect Google Sheet →</button>
     <div class="oerr" id="gserr"></div>
     <button class="ob ob-s" onclick="loadDemo()">▶ Load 350-RVM demo data</button>
   </div>
@@ -1181,6 +1212,7 @@ const GRP_COL={'Pre-NOC':'#7c3aed','NOC':'#0284c7','Agreement':'#0d9488','Schedu
 
 const TCOL={Bardez:'#0ea5e9',Tiswadi:'#6366f1',Pernem:'#f43f5e',Bicholim:'#f59e0b',Satari:'#22c55e',Ponda:'#a855f7',Salcete:'#ef4444',Mormugao:'#06b6d4',Quepem:'#fb923c',Sanguem:'#3b82f6',Canacona:'#14b8a6'};
 const PRIO_CL={High:'prio-h',Medium:'prio-m',Low:'prio-l'};
+const PRIO_BG={High:'#fee2e2',Medium:'#fef3c7',Low:'#dcfce7'};
 
 // ── STATE ──
 let DATA=[],GEO=null,gLayers={},mapMarkers=[];
@@ -1301,6 +1333,11 @@ function setLastUpdated(){
 }
 
 // ── CSV EXPORT ─────────────────────────────────────────────
+function stripHtml(s){
+  const d=document.createElement('div');
+  d.innerHTML=String(s||'');
+  return(d.textContent||d.innerText||'').replace(/\s+/g,' ').trim();
+}
 function exportCSV(){
   if(!DATA.length){toast('No data to export','warn');return;}
   const cols=['rvm_id','panchayat','taluka','location_name','location_type','operator','contact_name','contact_phone','priority','info_shared','principally_aligned','noc_received','agreement_signed','planned_install_date','rvm_installed','notes'];
@@ -1399,6 +1436,53 @@ function stageOf(r){
   return STAGES[0];
 }
 function stageGroup(r){return stageOf(r).group;}
+
+// ════════════════════════════════
+// ADMIN PASSWORD GATE
+// ════════════════════════════════
+// Change ADMIN_HASH to hash of your own password
+// Generate at: https://emn178.github.io/online-tools/sha256.html
+const ADMIN_HASH='a2e06a7ca6f9c2def3ba466f2762fd1042157e720c40cdd2949a32e0bd5422ee'; // = "recykal2024"
+const SESSION_KEY='rvm_admin_session';
+let _passCallback=null;
+
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function isAdminSession(){
+  return sessionStorage.getItem(SESSION_KEY)==='1';
+}
+function requireAdmin(callback){
+  if(isAdminSession()){callback();return;}
+  _passCallback=callback;
+  const gate=document.getElementById('pass-gate');
+  if(gate){gate.style.display='flex';setTimeout(()=>document.getElementById('pass-inp')?.focus(),100);}
+}
+async function checkPass(){
+  const inp=document.getElementById('pass-inp');
+  const errEl=document.getElementById('pass-err');
+  const val=inp?.value||'';
+  if(!val){errEl.textContent='Please enter the password';return;}
+  const hash=await sha256(val);
+  if(hash===ADMIN_HASH){
+    sessionStorage.setItem(SESSION_KEY,'1');
+    closePassGate();
+    if(_passCallback){_passCallback();_passCallback=null;}
+  } else {
+    errEl.textContent='Incorrect password. Try again.';
+    inp.value='';inp.classList.add('err');
+    setTimeout(()=>inp.classList.remove('err'),400);
+    inp.focus();
+  }
+}
+function closePassGate(){
+  const gate=document.getElementById('pass-gate');
+  if(gate) gate.style.display='none';
+  const inp=document.getElementById('pass-inp');
+  if(inp) inp.value='';
+  document.getElementById('pass-err').textContent='';
+}
 
 // ════════════════════════════════
 // MAP
@@ -1730,8 +1814,8 @@ function renderRVMDetail(r){
     if(upds.length){
       actSec.style.display='block';
       actEl.innerHTML=upds.slice().reverse().map(u=>{
-        const catCol={'r':'#dc2626','a':'#d97706','b':'#2563eb','p':'#7c3aed'};
-        const catMap={'Site not ready':'r','Space conflict':'r','Power unavailable':'r','Owner unavailable':'a','Permission withdrawn':'a','Renegotiating':'a','Machine not ready':'b','Transport delay':'b','Contractor unavailable':'b','NOC issue':'p','Panchayat objection':'p','Municipal clearance':'p'};
+        const catCol={'r':'#dc2626','b':'#2563eb','p':'#7c3aed','o':'#6d28d9'};
+        const catMap={'Site not ready':'r','Space conflict':'r','Power unavailable':'r','Machine not ready':'b','Transport delay':'b','Contractor unavailable':'b','NOC issue':'p','Panchayat objection':'p','Municipal clearance':'p'};
         const reasonPills=(u.delayReasons||[]).map(rr=>`<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:${catCol[catMap[rr]||'a']||'#d97706'}22;color:${catCol[catMap[rr]||'a']||'#d97706'}">${h(rr)}</span>`).join('');
         return`<div class="act-entry">
           <div class="act-header">
@@ -1767,14 +1851,46 @@ function toggleDChip(el){
   const cls='sel-'+cat;
   el.classList.contains(cls)?el.classList.remove(cls):el.classList.add(cls);
 }
+
+function addOtherReason(grp){
+  const isMap=grp==='map';
+  const inp=document.getElementById(isMap?'map-other-reason':'pl-other-'+grp);
+  const container=document.getElementById(isMap?'map-other-chips':'pl-other-chips-'+grp);
+  if(!inp||!container) return;
+  const val=inp.value.trim();
+  if(!val) return;
+  // Check not already added
+  if([...container.querySelectorAll('[data-reason]')].some(c=>c.dataset.reason===val)){
+    inp.value='';return;
+  }
+  // Create chip
+  const chip=document.createElement('span');
+  chip.className='dchip sel-p';
+  chip.dataset.grp=grp;
+  chip.dataset.cat='o'; // 'o' = other
+  chip.dataset.reason=val;
+  chip.innerHTML='<span class="dchip-dot"></span>'+h(val)+' <span onclick="this.parentElement.remove()" style="margin-left:4px;opacity:.6;cursor:pointer;font-size:11px">✕</span>';
+  container.appendChild(chip);
+  inp.value='';
+  inp.focus();
+}
 function getDelayReasons(grp){
-  const sel=document.querySelectorAll('.dchip.sel-r[data-grp="'+grp+'"],.dchip.sel-a[data-grp="'+grp+'"],.dchip.sel-b[data-grp="'+grp+'"],.dchip.sel-p[data-grp="'+grp+'"]');
-  return [...sel].map(el=>el.dataset.reason);
+  // Collect selected chips (r=site, b=logistics, p=compliance, o=other)
+  const sel=document.querySelectorAll(
+    '.dchip.sel-r[data-grp="'+grp+'"],.dchip.sel-b[data-grp="'+grp+'"],.dchip.sel-p[data-grp="'+grp+'"],.dchip[data-cat="o"][data-grp="'+grp+'"]'
+  );
+  return [...sel].map(el=>el.dataset.reason).filter(Boolean);
 }
 function clearDChips(grp){
   document.querySelectorAll('.dchip[data-grp="'+grp+'"]').forEach(el=>{
     el.classList.remove('sel-r','sel-a','sel-b','sel-p');
   });
+  // Clear custom other chips
+  const isMap=grp==='map';
+  const oc=document.getElementById(isMap?'map-other-chips':'pl-other-chips-'+grp);
+  if(oc) oc.innerHTML='';
+  const oi=document.getElementById(isMap?'map-other-reason':'pl-other-'+grp);
+  if(oi) oi.value='';
 }
 // showMapDelay removed — delay block always visible in Update tab
 function checkMapDelay(){
@@ -1857,9 +1973,8 @@ function renderUpdHist(id){
   // Stage colour lookup
   const stageInfo=(lbl)=>STAGES.find(s=>s.label===lbl)||{hex:'#94a3b8',lhex:'#f1f5f9',num:''};
   // Delay reason category colours
-  const catCol={r:'#dc2626',a:'#d97706',b:'#2563eb',p:'#7c3aed'};
+  const catCol={r:'#dc2626',b:'#2563eb',p:'#7c3aed',o:'#6d28d9'};
   const catMap={'Site not ready':'r','Space conflict':'r','Power unavailable':'r',
-    'Owner unavailable':'a','Permission withdrawn':'a','Renegotiating':'a',
     'Machine not ready':'b','Transport delay':'b','Contractor unavailable':'b',
     'NOC issue':'p','Panchayat objection':'p','Municipal clearance':'p'};
 
@@ -2149,9 +2264,8 @@ function renderActivityFeed(){
   all.sort((a,b)=>b.u.ts.localeCompare(a.u.ts));
   const recent=all.slice(0,15); // show last 15
 
-  const catCol={'r':'#dc2626','a':'#d97706','b':'#2563eb','p':'#7c3aed'};
+  const catCol={'r':'#dc2626','b':'#2563eb','p':'#7c3aed','o':'#6d28d9'};
   const catMap={'Site not ready':'r','Space conflict':'r','Power unavailable':'r',
-    'Owner unavailable':'a','Permission withdrawn':'a','Renegotiating':'a',
     'Machine not ready':'b','Transport delay':'b','Contractor unavailable':'b',
     'NOC issue':'p','Panchayat objection':'p','Municipal clearance':'p'};
 
@@ -2259,14 +2373,13 @@ function renderRescheduleTracker(){
   // ── Reason breakdown bar chart ──
   const reasonCounts={};
   const reasonCats={};  // reason → category colour
-  const catColour={'r':'#dc2626','a':'#d97706','b':'#2563eb','p':'#7c3aed'};
+  const catColour={'r':'#dc2626','b':'#2563eb','p':'#7c3aed','o':'#6d28d9'};
   events.forEach(e=>(e.reasons||[]).forEach(reason=>{
     reasonCounts[reason]=(reasonCounts[reason]||0)+1;
   }));
   // Also pull cat from dchip data-cat attribute if available (fallback: guess from first word)
   // Store alongside event reasons
   const catMap={'Site not ready':'r','Space conflict':'r','Power unavailable':'r',
-    'Owner unavailable':'a','Permission withdrawn':'a','Renegotiating':'a',
     'Machine not ready':'b','Transport delay':'b','Contractor unavailable':'b',
     'NOC issue':'p','Panchayat objection':'p','Municipal clearance':'p'};
   const sorted=Object.entries(reasonCounts).sort((a,b)=>b[1]-a[1]);
@@ -2514,11 +2627,16 @@ function renderPipeline(){
               <span class="dchip" data-grp="\${esc(r.rvm_id)}" data-cat="r" data-reason="Space conflict"      onclick="toggleDChip(this)"><span class="dchip-dot"></span>Space conflict</span>
               <span class="dchip" data-grp="\${esc(r.rvm_id)}" data-cat="r" data-reason="Power unavailable"   onclick="toggleDChip(this)"><span class="dchip-dot"></span>Power unavailable</span>
             </div></div>
-            <div class="dcat-row"><span class="dcat-lbl" style="color:#92400e">Owner</span><div class="dchips">
-              <span class="dchip" data-grp="\${esc(r.rvm_id)}" data-cat="a" data-reason="Owner unavailable"   onclick="toggleDChip(this)"><span class="dchip-dot"></span>Owner unavailable</span>
-              <span class="dchip" data-grp="\${esc(r.rvm_id)}" data-cat="a" data-reason="Permission withdrawn" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Permission withdrawn</span>
-              <span class="dchip" data-grp="\${esc(r.rvm_id)}" data-cat="a" data-reason="Renegotiating"        onclick="toggleDChip(this)"><span class="dchip-dot"></span>Renegotiating</span>
-            </div></div>
+            <div class="dcat-row"><span class="dcat-lbl" style="color:#6d28d9">Other</span>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;gap:5px">
+                  <input id="pl-other-\${esc(r.rvm_id)}" class="fi" type="text" placeholder="Specify other reason…" style="flex:1;font-size:11px;padding:5px 8px"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();addOtherReason('\${esc(r.rvm_id)}');}">
+                  <button onclick="addOtherReason('\${esc(r.rvm_id)}')" style="padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">+ Add</button>
+                </div>
+                <div id="pl-other-chips-\${esc(r.rvm_id)}" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+              </div>
+            </div>
             <div class="dcat-row"><span class="dcat-lbl" style="color:#1e3a8a">Logistics</span><div class="dchips">
               <span class="dchip" data-grp="\${esc(r.rvm_id)}" data-cat="b" data-reason="Machine not ready"   onclick="toggleDChip(this)"><span class="dchip-dot"></span>Machine not ready</span>
               <span class="dchip" data-grp="\${esc(r.rvm_id)}" data-cat="b" data-reason="Transport delay"     onclick="toggleDChip(this)"><span class="dchip-dot"></span>Transport delay</span>
@@ -2808,13 +2926,26 @@ function loadData(rows){
   else if(curTab==='pipeline'){renderPipelineStageTabs();renderPipeline();}
   else if(curTab==='schedule') renderSchedule();
   else if(curTab==='table') renderTable();
-  setSyncStatus('ok',`${DATA.length} RVMs · ${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}`);
+  setSyncStatus('ok',`${DATA.length} RVMs · ${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} · ↻ 5min`);
 }
 function setSyncStatus(s,msg){const b=document.getElementById('sync-badge');b.className=s;b.innerHTML=`<div class="sdot"></div><span id="sync-txt">${h(msg)}</span>`;}
 
 // ════════════════════════════════
 // DEMO DATA (correct flow)
 // ════════════════════════════════
+function disconnectSheet(){
+  localStorage.removeItem('rvm_pipe_v3');
+  SHEET_URL='';
+  if(syncTimer){clearInterval(syncTimer);syncTimer=null;}
+  const ind=document.getElementById('sheet-indicator');
+  if(ind) ind.style.display='none';
+  const gsurl=document.getElementById('gsurl');
+  if(gsurl) gsurl.value='';
+  DATA=[];LOCAL={};
+  setSyncStatus('ok','No data');
+  document.getElementById('overlay').style.display='flex';
+  toast('Sheet disconnected','ok');
+}
 function showSheetIndicator(url){
   const ind=document.getElementById('sheet-indicator');
   const nameEl=document.getElementById('sheet-name-display');
@@ -2979,38 +3110,72 @@ function genDemo(){
 // ════════════════════════════════
 function onDrop(e){e.preventDefault();document.getElementById('xldrop').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)readXL(f);}
 function onXLFile(e){if(e.target.files[0])readXL(e.target.files[0]);}
+function showSpinner(msg,sub){
+  const s=document.getElementById('upload-spinner');
+  const l=document.getElementById('spin-label');
+  const ss=document.getElementById('spin-sub');
+  if(s)s.style.display='flex';
+  if(l)l.textContent=msg||'Processing…';
+  if(ss)ss.textContent=sub||'This may take a moment';
+}
+function hideSpinner(){
+  const s=document.getElementById('upload-spinner');
+  if(s)s.style.display='none';
+}
 function readXL(file){
+  showSpinner('Reading '+file.name+'…','Processing rows, please wait');
   const reader=new FileReader();
   reader.onload=ev=>{try{
     const wb=XLSX.read(ev.target.result,{type:'binary'});
     const sn=wb.SheetNames.find(n=>n==='RVM Pipeline')||wb.SheetNames[0];
     const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:''});
-    const parsed=raw.filter(r=>!['PRE-NOC','NOC','POST-NOC','#'].includes(String(Object.values(r)[0]||'').trim().toUpperCase())).map(r=>{const obj=Object.create(null);Object.keys(r).forEach(k=>{const sk=String(k).toLowerCase().replace(/[\s\-\/①②③④⑤⑥]+/g,'_').replace(/[^a-z0-9_]/g,'').replace(/^_+|_+$/g,'');if(!BLOCKED.has(sk)){obj[sk]=String(r[k]===null?'':r[k]).trim();obj[k]=String(r[k]===null?'':r[k]).trim();}});return normRow(obj);}).filter(r=>r.rvm_id||r.location_name||r.panchayat);
+    const parsed=raw.filter(r=>!['PRE-NOC','NOC','POST-NOC','#'].includes(String(Object.values(r)[0]||'').trim().toUpperCase())).map(r=>{const obj=Object.create(null);Object.keys(r).forEach(k=>{const sk=String(k).toLowerCase().replace(/[\s\-\/①②③④⑤⑥]+/g,'_').replace(/[^a-z0-9_]/g,'').replace(/^_+|_+$/g,'');if(!BLOCKED.has(sk)){obj[sk]=String(r[k]===null?'':r[k]).trim();obj[k]=String(r[k]===null?'':r[k]).trim();}});return normRow(obj);}).filter(r=>r.rvm_id||r.location_name||r.panchayat).filter(r=>Object.values(r).some(v=>v!==''&&v!==null&&v!==undefined));
     if(!parsed.length)throw new Error('No valid rows. Tab must be "RVM Pipeline".');
-    loadData(parsed);
-  }catch(e){showErr('⚠ '+e.message);setSyncStatus('err','Parse error');}};
+    hideSpinner();loadData(parsed);
+  }catch(e){hideSpinner();showErr('⚠ '+e.message);setSyncStatus('err','Parse error');}};
   reader.readAsBinaryString(file);
 }
 function showErr(msg){const e=document.getElementById('gserr');e.style.display='block';e.textContent=msg;}
 function sheetId(u){const m=u.match(/\/d\/([a-zA-Z0-9_-]{20,})/);return m?m[1]:null;}
 function buildUrls(raw){const id=sheetId(raw);if(!id)return[];const sh='RVM Pipeline';return[`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sh)}`,`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&sheet=${encodeURIComponent(sh)}`,`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`];}
 async function tryFetch(url){const c=new AbortController();const t=setTimeout(()=>c.abort(),10000);try{const r=await fetch(url+'&_nc='+Date.now(),{mode:'cors',credentials:'omit',signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);const tx=await r.text();if(tx.trim().startsWith('<'))throw new Error('Got HTML — check sharing');if(tx.trim().length<10)throw new Error('Empty');return tx;}catch(e){clearTimeout(t);if(e.name==='AbortError')throw new Error('Timeout');throw e;}}
-function parseCSV(csv){try{const lines=csv.split('\n').filter(l=>l.trim());if(!lines.length)return[];const hdr=splitL(lines[0]).map(h=>h.toLowerCase().replace(/[\s\-\/①②③④⑤⑥]+/g,'_').replace(/[^a-z0-9_]/g,'').replace(/^_+|_+$/g,''));const sh=hdr.map(h=>BLOCKED.has(h)?'_b':h);return lines.slice(1).map(line=>{const vals=splitL(line);const obj=Object.create(null);sh.forEach((h,i)=>obj[h]=(vals[i]||'').trim());return normRow(obj);}).filter(r=>r.rvm_id||r.location_name||r.panchayat);}catch(e){return[];}}
+function parseCSV(csv){try{const lines=csv.split('\n').filter(l=>l.trim());if(!lines.length)return[];const hdr=splitL(lines[0]).map(h=>h.toLowerCase().replace(/[\s\-\/①②③④⑤⑥]+/g,'_').replace(/[^a-z0-9_]/g,'').replace(/^_+|_+$/g,''));const sh=hdr.map(h=>BLOCKED.has(h)?'_b':h);return lines.slice(1).map(line=>{const vals=splitL(line);const obj=Object.create(null);sh.forEach((h,i)=>obj[h]=(vals[i]||'').trim());return normRow(obj);}).filter(r=>r.rvm_id||r.location_name||r.panchayat).filter(r=>Object.values(r).some(v=>v!==''&&v!==null&&v!==undefined));}catch(e){return[];}}
 function splitL(line){const vals=[];let cur='',inQ=false;for(const c of line){if(c==='"')inQ=!inQ;else if(c===','&&!inQ){vals.push(cur);cur='';}else cur+=c;}vals.push(cur);return vals.map(v=>v.replace(/^"|"$/g,'').trim());}
 async function connectGS(){
   const raw=document.getElementById('gsurl').value.trim();
-  if(!raw||!raw.includes('google.com')){showErr('Paste a Google Sheet URL');return;}
-  const btn=document.getElementById('gsbtn');btn.textContent='Connecting…';btn.disabled=true;
-  let lastErr='';
-  for(const url of buildUrls(raw)){try{const csv=await tryFetch(url);const p=parseCSV(csv);if(!p.length){lastErr='No valid rows — tab must be "RVM Pipeline"';continue;}if(/^https:\/\/docs\.google\.com\//i.test(url))localStorage.setItem('rvm_pipe_v3',url);
-        loadData(p);
-        // Show sheet indicator
-        showSheetIndicator(raw);
-        btn.textContent='Connect →';btn.disabled=false;return;}catch(e){lastErr=e.message;}}
+  if(!raw){showErr('Please paste a Google Sheet URL.');return;}
+  if(!raw.includes('docs.google.com/spreadsheets')){
+    showErr('That doesn\'t look like a Google Sheet URL.\nIt should start with: https://docs.google.com/spreadsheets/d/...');return;
+  }
+  const btn=document.getElementById('gsbtn');
+  btn.textContent='Connecting…';btn.disabled=true;
+  document.getElementById('gserr').style.display='none';
+  let lastErr='',lastType='';
+  for(const url of buildUrls(raw)){
+    try{
+      const csv=await tryFetch(url);
+      const p=parseCSV(csv);
+      if(!p.length){lastErr='No valid rows found.';lastType='norows';continue;}
+      localStorage.setItem('rvm_pipe_v3',raw);
+      SHEET_URL=url;
+      loadData(p);showSheetIndicator(raw);
+      btn.textContent='Connect →';btn.disabled=false;
+      toast('✅ Connected — '+p.length+' RVMs loaded','ok');return;
+    }catch(e){
+      lastErr=e.message;
+      if(e.message.includes('HTML')||e.message.includes('403')||e.message.includes('401')) lastType='private';
+      else if(e.message.includes('Timeout')) lastType='timeout';
+      else lastType='generic';
+    }
+  }
   btn.textContent='Connect Google Sheet →';btn.disabled=false;
-  showErr(`Failed: ${lastErr}
-
-Share sheet → Anyone with link → Viewer.`);
+  const msgs={
+    private:'Sheet is not publicly accessible.\n\nTo fix: Open the sheet → Share (top right) → Change to "Anyone with the link" → Viewer → Done. Then try again.',
+    timeout:'Connection timed out. Check your internet and try again.',
+    norows:'Sheet connected but no data found.\n\nTo fix: Make sure the tab is named exactly "RVM Pipeline" (case-sensitive) and row 1 has the correct column headers.',
+    generic:'Could not load sheet.\n\nMake sure:\n• Tab is named "RVM Pipeline"\n• Sheet is shared as Anyone with link → Viewer\n\nError: '+lastErr,
+  };
+  showErr(msgs[lastType]||msgs.generic);
 }
 
 // ════════════════════════════════
@@ -3018,13 +3183,40 @@ Share sheet → Anyone with link → Viewer.`);
 // ════════════════════════════════
 (()=>{
   loadGeo();
-  if(SHEET_URL&&/^https:\/\/docs\.google\.com\//i.test(SHEET_URL)){
-    showSheetIndicator(SHEET_URL);
-    document.getElementById('gsurl').value=SHEET_URL.replace(/\/gviz.*/,'/edit');
-    tryFetch(SHEET_URL).then(csv=>{const p=parseCSV(csv);if(p.length)loadData(p);else setSyncStatus('err','Could not reload');}).catch(()=>setSyncStatus('err','Could not reload'));
+  if(SHEET_URL){
+    // Rebuild correct fetch URL from stored raw URL
+    const _savedRaw=localStorage.getItem('rvm_pipe_v3')||'';
+    const _builtUrls=buildUrls(_savedRaw||SHEET_URL);
+    const _fetchUrl=_builtUrls[0]||SHEET_URL;
+    SHEET_URL=_fetchUrl;
+    showSheetIndicator(_savedRaw||SHEET_URL);
+    const _gsEl=document.getElementById('gsurl');
+    if(_gsEl) _gsEl.value=(_savedRaw).replace(/\/gviz.*/,'/edit').replace(/\/export.*/,'/edit');
+    setSyncStatus('ok','Reconnecting…');
+    tryFetch(_fetchUrl)
+      .then(csv=>{
+        const p=parseCSV(csv);
+        if(p.length){
+          loadData(p);
+          if(!syncTimer) syncTimer=setInterval(()=>{
+            tryFetch(SHEET_URL).then(csv2=>{const p2=parseCSV(csv2);if(p2.length)loadData(p2);}).catch(()=>{});
+          },300000);
+        } else setSyncStatus('err','Sheet connected — check tab is named "RVM Pipeline"');
+      })
+      .catch(()=>setSyncStatus('err','Could not reload — check sheet is public'));
   }
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&DATA.length)document.getElementById('overlay').style.display='none';});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden&&syncTimer){clearInterval(syncTimer);syncTimer=null;}else if(!document.hidden&&SHEET_URL&&!syncTimer){syncTimer=setInterval(()=>tryFetch(SHEET_URL).then(csv=>{const p=parseCSV(csv);if(p.length)loadData(p);}).catch(()=>{}),60000);}});
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){
+      if(syncTimer){clearInterval(syncTimer);syncTimer=null;}
+    } else if(SHEET_URL){
+      // Tab visible again — fetch immediately, then restart 5-min timer
+      tryFetch(SHEET_URL).then(csv=>{const p=parseCSV(csv);if(p.length)loadData(p);}).catch(()=>{});
+      if(!syncTimer) syncTimer=setInterval(()=>{
+        tryFetch(SHEET_URL).then(csv=>{const p=parseCSV(csv);if(p.length)loadData(p);}).catch(()=>{});
+      },300000);
+    }
+  });
   window.addEventListener('beforeunload',()=>{if(syncTimer)clearInterval(syncTimer);});
 })();
 </script>
@@ -3032,5 +3224,25 @@ Share sheet → Anyone with link → Viewer.`);
 @keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,.4)}65%{box-shadow:0 0 0 8px rgba(13,148,136,0)}}
 @keyframes si{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 </style>
+<!-- ── Admin Password Gate ── -->
+<div id="pass-gate">
+  <div id="pass-box">
+    <div style="font-size:32px;margin-bottom:10px">🔒</div>
+    <h3>Admin Access Required</h3>
+    <p>Only authorised users can upload data or connect a Google Sheet.</p>
+    <input id="pass-inp" type="password" placeholder="Enter password" maxlength="30"
+      onkeydown="if(event.key==='Enter')checkPass()"
+      oninput="document.getElementById('pass-err').textContent=''">
+    <div id="pass-err"></div>
+    <button id="pass-submit" onclick="checkPass()">Unlock</button>
+    <span id="pass-cancel" onclick="closePassGate()">Cancel</span>
+  </div>
+</div>
+
+<div id="upload-spinner">
+  <div class="spin-ring"></div>
+  <div class="spin-label" id="spin-label">Processing file…</div>
+  <div class="spin-sub" id="spin-sub">This may take a moment for large files</div>
+</div>
 </body>
 </html>
