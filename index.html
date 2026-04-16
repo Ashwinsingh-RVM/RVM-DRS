@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#0d9488">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://docs.google.com https://*.tile.openstreetmap.org; img-src 'self' data: https:; connect-src 'self' https://docs.google.com;">
+
 <title>Goa DRS · RVM Pipeline</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -505,13 +505,14 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
   #chip-sub{font-size:11px}
 
   /* ── OVERVIEW mobile ── */
+  #mob-kpi-strip{display:grid!important}
   #v-overview .ov{padding:12px}
   .kpi-grid{grid-template-columns:repeat(3,1fr);gap:8px}
   .kc{padding:12px}
   .kc-n{font-size:26px}
   .kc-l{font-size:10px}
   .kc-s{font-size:9px}
-  .flow-banner{gap:2px;padding:10px 12px}
+  .flow-banner{gap:2px;padding:10px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .fs-box{min-width:80px;padding:8px 8px}
   .fs-num{font-size:8px}
   .fs-label{font-size:9px}
@@ -546,8 +547,8 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
   #pl-header{flex-wrap:wrap;gap:8px;padding:10px 12px}
   #pl-header h2{font-size:13px}
   #pl-search{width:100%;font-size:12px}
-  .pl-stage-tabs{gap:4px;padding:0}
-  .pl-stab{font-size:10px;padding:4px 8px}
+  .pl-stage-tabs{gap:4px;padding:0;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .pl-stab{font-size:10px;padding:4px 8px;white-space:nowrap;flex-shrink:0}
   #pl-body{padding:10px 12px}
   .plcard-name{font-size:13px}
   .plcard-sub{font-size:10px}
@@ -683,6 +684,39 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
 .spin-label{color:#fff;font-size:13px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.1px}
 .spin-sub{color:rgba(255,255,255,.6);font-size:11px;font-family:'Plus Jakarta Sans',sans-serif}
 @keyframes spin-anim{to{transform:rotate(360deg)}}
+/* ── Mobile sheet tabs ── */
+.mob-tabs{display:flex;border-bottom:2px solid var(--line);margin:0 -16px;padding:0 16px;gap:0}
+.mob-tab{flex:1;padding:10px 4px;font-size:11px;font-weight:700;text-align:center;color:var(--ink4);cursor:pointer;border:none;background:none;font-family:'Plus Jakarta Sans',sans-serif;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;text-transform:uppercase;letter-spacing:.3px}
+.mob-tab.act{color:var(--teal-d);border-bottom-color:var(--teal)}
+.mob-tab-pane{display:none;padding-top:14px}
+.mob-tab-pane.on{display:block}
+/* ── Mobile panchayat list (fullscreen sheet) ── */
+#mob-panch-sheet{position:fixed;inset:0;z-index:7500;background:var(--bg2);display:none;flex-direction:column;overflow:hidden}
+#mob-panch-sheet.open{display:flex}
+.mps-header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-shrink:0;background:var(--bg2)}
+.mps-title{font-size:15px;font-weight:800;flex:1}
+.mps-close{width:32px;height:32px;border-radius:50%;background:var(--bg3);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mps-search{padding:10px 16px;border-bottom:1px solid var(--line);flex-shrink:0}
+.mps-search input{width:100%;padding:10px 12px 10px 32px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg3);color:var(--ink);outline:none}
+.mps-search input:focus{border-color:var(--teal)}
+.mps-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mps-group{border-bottom:1px solid var(--line)}
+.mps-taluka{padding:8px 16px;font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.6px;background:var(--bg3);position:sticky;top:0;z-index:1}
+.mps-panch{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--bg3);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mps-panch:active{background:var(--bg4)}
+.mps-panch-name{font-size:14px;font-weight:600;color:var(--ink);flex:1}
+.mps-panch-cnt{font-size:11px;font-weight:700;color:var(--ink4);background:var(--bg3);padding:2px 8px;border-radius:10px}
+/* RVM list inside panchayat */
+.mps-rvm{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bg3);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mps-rvm:active{background:var(--teal-l)}
+.mps-back{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;font-weight:700;color:var(--teal-d);cursor:pointer;border-bottom:2px solid var(--line);background:var(--teal-l)}
+/* Mobile update form */
+.mob-upd-form{padding:0 0 16px}
+.mob-upd-section{margin-bottom:14px}
+.mob-upd-label{font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.mob-dcat{margin-bottom:10px}
+.mob-dcat-title{font-size:10px;font-weight:700;margin-bottom:6px;padding:3px 8px;border-radius:6px;display:inline-block}
+
 </style>
 </head>
 <body>
@@ -709,7 +743,7 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
     <div class="tkpi"><b id="tk-pct" style="color:var(--teal-d)">—</b><small>Done %</small></div>
   </div>
   <div class="tsp"></div>
-  <button id="upload-btn" onclick="requireAdmin(()=>document.getElementById('overlay').style.display='flex')">⬆ Load Data</button>
+  <button id="upload-btn" onclick="requireAdmin(()=>document.getElementById('overlay').style.display='flex')" title="Admin only — change data source">⚙ Data Source</button>
   <span id="last-updated"></span><div id="sync-badge"><div class="sdot"></div><span id="sync-txt">No data</span></div>
 <div id="sheet-indicator" style="display:none;align-items:center;gap:4px;padding:3px 8px;border-radius:16px;background:var(--teal-l);border:1px solid rgba(13,148,136,.25);font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--teal-d);flex-shrink:0;margin-left:6px;max-width:220px;white-space:nowrap">
   <span style="flex-shrink:0">📊</span>
@@ -756,6 +790,33 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
 ═══════════════════════════════════ -->
 <div class="view act" id="v-overview">
 <div class="ov">
+  <!-- Mobile-only top KPI strip -->
+  <div id="mob-kpi-strip" style="display:none;gap:8px;grid-template-columns:repeat(3,1fr)">
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;border-top:2px solid var(--teal)">
+      <div style="font-size:22px;font-weight:800;color:var(--teal-d)" id="mob-tk-total">—</div>
+      <div style="font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px">Total</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;border-top:2px solid var(--green)">
+      <div style="font-size:22px;font-weight:800;color:var(--green)" id="mob-tk-inst">—</div>
+      <div style="font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px">Installed</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;border-top:2px solid var(--amber)">
+      <div style="font-size:22px;font-weight:800;color:var(--amber)" id="mob-tk-sched">—</div>
+      <div style="font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px">Scheduled</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;border-top:2px solid var(--sky)">
+      <div style="font-size:22px;font-weight:800;color:var(--sky)" id="mob-tk-noc">—</div>
+      <div style="font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px">NOC Done</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;border-top:2px solid var(--red)">
+      <div style="font-size:22px;font-weight:800;color:var(--red)" id="mob-tk-overdue">—</div>
+      <div style="font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px">Overdue</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;border-top:2px solid var(--teal-d)">
+      <div style="font-size:22px;font-weight:800;color:var(--teal-d)" id="mob-tk-pct">—</div>
+      <div style="font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px">Done %</div>
+    </div>
+  </div>
   <!-- Correct pipeline flow banner -->
   <div>
     <div class="sec-title">Correct Pipeline Flow</div>
@@ -946,7 +1007,7 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
   <div id="map-center">
     <div id="map"></div>
     <div id="map-chip"><b id="chip-title">All Goa</b><s id="chip-sub">Load data to explore</s></div>
-    <button id="map-filter-btn" onclick="toggleMobMapFilter()" style="position:absolute;top:10px;right:10px;z-index:400;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-size:11px;font-weight:700;color:var(--teal-d);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.08);display:none">⚙ Filter</button>
+    <button id="map-filter-btn" onclick="openMobPanchSheet()" style="position:absolute;top:10px;right:10px;z-index:400;background:var(--teal);color:#fff;border:none;border-radius:24px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 4px 16px rgba(13,148,136,.4);display:none;align-items:center;gap:6px">📍 Select Location</button>
     <div id="map-legend"></div>
   </div>
   <!-- Right: selected RVM detail -->
@@ -1176,8 +1237,8 @@ table#rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
 <!-- CONNECT OVERLAY -->
 <div id="overlay">
   <div class="oc">
-    <h2>🗂 Load RVM Data</h2>
-    <p>Drop <b>rvm_pipeline_tracker.xlsx</b> or paste a Google Sheet URL.<br>Sheet tab must be named <b>RVM Pipeline</b>.</p>
+    <h2>⚙ Admin: Data Source</h2>
+    <p>Connect a Google Sheet or upload a file. Data becomes visible to <b>all users</b> automatically.<br>Sheet tab must be named <b>RVM Pipeline</b>.</p>
     <div class="xldrop" id="xldrop"
       ondragover="event.preventDefault();this.classList.add('drag')"
       ondragleave="this.classList.remove('drag')"
@@ -1213,6 +1274,7 @@ const GRP_COL={'Pre-NOC':'#7c3aed','NOC':'#0284c7','Agreement':'#0d9488','Schedu
 const TCOL={Bardez:'#0ea5e9',Tiswadi:'#6366f1',Pernem:'#f43f5e',Bicholim:'#f59e0b',Satari:'#22c55e',Ponda:'#a855f7',Salcete:'#ef4444',Mormugao:'#06b6d4',Quepem:'#fb923c',Sanguem:'#3b82f6',Canacona:'#14b8a6'};
 const PRIO_CL={High:'prio-h',Medium:'prio-m',Low:'prio-l'};
 const PRIO_BG={High:'#fee2e2',Medium:'#fef3c7',Low:'#dcfce7'};
+const PRIO_C={High:'#991b1b',Medium:'#92400e',Low:'#166534'};
 
 // ── STATE ──
 let DATA=[],GEO=null,gLayers={},mapMarkers=[];
@@ -1258,54 +1320,346 @@ function openMobSheet(r){
   if(!body) return;
   const s=stageOf(r);
   const curIdx=STAGES.indexOf(s);
+  const upds=(LOCAL[r.rvm_id]||{}).updates||[];
+  const lastNote=upds.slice().reverse().find(u=>u.notes);
+
   body.innerHTML=`
-    <div style="padding:12px 0 8px">
-      <div style="font-size:9px;font-weight:700;color:var(--ink4);font-family:'JetBrains Mono',monospace;margin-bottom:3px">${h(r.rvm_id)}</div>
-      <div style="font-size:16px;font-weight:800;color:var(--ink);margin-bottom:8px">${h(r.location_name)}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
+    <!-- Header -->
+    <div style="padding:10px 0 8px">
+      <div style="font-size:9px;font-weight:700;color:var(--ink4);font-family:'JetBrains Mono',monospace;margin-bottom:2px">${h(r.rvm_id)}</div>
+      <div style="font-size:16px;font-weight:800;color:var(--ink);line-height:1.2;margin-bottom:6px">${h(r.location_name)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
         <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:16px;background:${s.lhex};color:${s.hex}">${s.num} ${h(s.label)}</span>
         ${r.priority?`<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:16px;background:${PRIO_BG[r.priority]||'var(--bg3)'};color:${PRIO_C[r.priority]||'var(--ink3)'}">${h(r.priority)}</span>`:''}
+        <span style="font-size:10px;color:var(--ink4);padding:3px 8px">${h(r.panchayat)} · ${h(r.taluka)}</span>
       </div>
     </div>
-    <div style="margin-bottom:14px">
-      <div style="font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">🔄 Pipeline</div>
-      ${STAGES.map((st,i)=>{
-        const done=i<=curIdx;
-        const date=i===4?r.planned_install_date:(r[st.key]||'');
-        return`<div style="display:flex;align-items:flex-start;gap:9px;padding:5px 0;border-bottom:1px solid var(--bg3)">
-          <div style="width:18px;height:18px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${done?st.hex:'var(--line)'};color:${done?'#fff':'var(--ink4)'}">${done?'✓':st.num}</div>
-          <div>
-            <div style="font-size:11px;font-weight:600;color:${done?'var(--ink)':'var(--ink4)'}">${h(st.label)}</div>
-            ${date?`<div style="font-size:9px;color:var(--ink4);font-family:'JetBrains Mono',monospace">📅 ${h(date)}</div>`:''}
+
+    <!-- Tabs -->
+    <div class="mob-tabs">
+      <button class="mob-tab act" onclick="mobSwitchTab('info',this)">📍 Info</button>
+      <button class="mob-tab" onclick="mobSwitchTab('update',this)">✏️ Update</button>
+      <button class="mob-tab" onclick="mobSwitchTab('history',this)">📋 History <span style="font-size:9px;background:var(--teal-l);color:var(--teal-d);padding:1px 5px;border-radius:8px;margin-left:3px">${upds.length}</span></button>
+    </div>
+
+    <!-- INFO TAB -->
+    <div class="mob-tab-pane on" id="mtp-info">
+      <!-- Pipeline steps -->
+      <div style="margin-bottom:14px">
+        ${STAGES.map((st,i)=>{
+          const done=i<=curIdx;
+          const date=i===4?r.planned_install_date:(r[st.key]||'');
+          return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg3)">
+            <div style="width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:${done?st.hex:'var(--line)'};color:${done?'#fff':'var(--ink4)'}">${done?'✓':st.num}</div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600;color:${done?'var(--ink)':'var(--ink4)'}">${h(st.label)}</div>
+              ${date?`<div style="font-size:10px;color:var(--ink4);font-family:'JetBrains Mono',monospace">📅 ${h(date)}</div>`:''}
+            </div>
+            ${done&&i===curIdx?`<span style="font-size:9px;font-weight:700;background:${st.lhex};color:${st.hex};padding:2px 7px;border-radius:8px">Current</span>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+      <!-- Location grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--bg3);border-radius:10px;padding:10px"><div style="font-size:9px;font-weight:700;color:var(--ink4);margin-bottom:3px">OPERATOR</div><div style="font-size:12px;font-weight:600">${h(r.operator||'—')}</div></div>
+        <div style="background:var(--bg3);border-radius:10px;padding:10px"><div style="font-size:9px;font-weight:700;color:var(--ink4);margin-bottom:3px">CONTACT</div><div style="font-size:12px;font-weight:600">${r.contact_phone?`<a href="tel:+91${h((r.contact_phone||'').replace(/\D/g,''))}" style="color:var(--teal-d)">${h(r.contact_phone)}</a>`:h(r.contact_name||'—')}</div></div>
+      </div>
+      ${lastNote?`<div style="background:var(--teal-l);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--ink2);line-height:1.5">💬 ${h(lastNote.notes)}</div>`:''}
+      <!-- Action button -->
+      <button onclick="mobSwitchTabBtn('update')" style="width:100%;padding:14px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.2px">✏️ Add Update / Meeting Notes</button>
+    </div>
+
+    <!-- UPDATE TAB -->
+    <div class="mob-tab-pane" id="mtp-update">
+      <div class="mob-upd-form">
+        <!-- Stage -->
+        <div class="mob-upd-section">
+          <label class="mob-upd-label">New Stage</label>
+          <select class="fsel" id="mob-upd-stage" style="font-size:14px;padding:12px">
+            ${STAGES.map(st=>`<option value="${h(st.label)}"${stageOf(r).label===st.label?' selected':''}>${st.num} ${h(st.label)}</option>`).join('')}
+          </select>
+        </div>
+        <!-- Date -->
+        <div class="mob-upd-section">
+          <label class="mob-upd-label">Date</label>
+          <input class="fi" id="mob-upd-date" type="date" value="${new Date().toISOString().slice(0,10)}" style="font-size:16px;padding:12px">
+        </div>
+        <!-- Meeting Notes -->
+        <div class="mob-upd-section">
+          <label class="mob-upd-label">Meeting Notes</label>
+          <textarea class="fi" id="mob-upd-notes" placeholder="What was discussed? Any decisions, next steps, commitments…" style="font-size:14px;padding:12px;min-height:90px;resize:none;line-height:1.5"></textarea>
+        </div>
+        <!-- Your Name -->
+        <div class="mob-upd-section">
+          <label class="mob-upd-label">Your Name <span style="color:var(--red)">*</span></label>
+          <input class="fi" id="mob-upd-by" type="text" placeholder="Required" style="font-size:16px;padding:12px" value="${localStorage.getItem('rvm_updater_name')||''}">
+        </div>
+        <!-- Delay Reasons -->
+        <div class="mob-upd-section">
+          <label class="mob-upd-label">Delay Reason (optional)</label>
+          <!-- Site -->
+          <div class="mob-dcat">
+            <div class="mob-dcat-title" style="background:var(--red-l);color:var(--red)">🔴 Site</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="dchip" data-grp="mob" data-cat="r" data-reason="Site not ready" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Site not ready</span>
+              <span class="dchip" data-grp="mob" data-cat="r" data-reason="Space conflict" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Space conflict</span>
+              <span class="dchip" data-grp="mob" data-cat="r" data-reason="Power unavailable" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Power unavailable</span>
+            </div>
           </div>
-        </div>`;
-      }).join('')}
+          <!-- Logistics -->
+          <div class="mob-dcat">
+            <div class="mob-dcat-title" style="background:var(--sky-l);color:var(--sky)">🔵 Logistics</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="dchip" data-grp="mob" data-cat="b" data-reason="Machine not ready" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Machine not ready</span>
+              <span class="dchip" data-grp="mob" data-cat="b" data-reason="Transport delay" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Transport delay</span>
+              <span class="dchip" data-grp="mob" data-cat="b" data-reason="Contractor unavailable" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Contractor unavailable</span>
+            </div>
+          </div>
+          <!-- Compliance -->
+          <div class="mob-dcat">
+            <div class="mob-dcat-title" style="background:var(--violet-l);color:var(--violet)">🟣 Compliance</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="dchip" data-grp="mob" data-cat="p" data-reason="NOC issue" onclick="toggleDChip(this)"><span class="dchip-dot"></span>NOC issue</span>
+              <span class="dchip" data-grp="mob" data-cat="p" data-reason="Panchayat objection" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Panchayat objection</span>
+              <span class="dchip" data-grp="mob" data-cat="p" data-reason="Municipal clearance" onclick="toggleDChip(this)"><span class="dchip-dot"></span>Municipal clearance</span>
+            </div>
+          </div>
+          <!-- Other -->
+          <div class="mob-dcat">
+            <div class="mob-dcat-title" style="background:var(--amber-l);color:var(--amber)">🟡 Other</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:5px">
+              <input id="mob-other-reason" class="fi" type="text" placeholder="Type reason…" style="flex:1;font-size:13px;padding:8px 10px"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addOtherReason('mob');}">
+              <button onclick="addOtherReason('mob')" style="padding:8px 12px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ Add</button>
+            </div>
+            <div id="mob-other-chips" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+          </div>
+        </div>
+        <!-- Reschedule date -->
+        <div class="mob-upd-section">
+          <label class="mob-upd-label">📅 Reschedule to (optional)</label>
+          <input class="fi" id="mob-upd-resched" type="date" style="font-size:16px;padding:12px">
+        </div>
+        <!-- Save button -->
+        <button onclick="submitMobUpdate('${esc(r.rvm_id)}')" style="width:100%;padding:16px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.2px;margin-top:4px">✅ Save Update</button>
+        <div id="mob-upd-ok" style="display:none;margin-top:10px;padding:12px;background:var(--green-l);border-radius:10px;text-align:center;font-size:13px;font-weight:700;color:var(--green)">✓ Saved successfully!</div>
+      </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-      <div style="background:var(--bg3);border-radius:10px;padding:10px">
-        <div style="font-size:9px;font-weight:700;color:var(--ink4);margin-bottom:4px">PANCHAYAT</div>
-        <div style="font-size:13px;font-weight:700">${h(r.panchayat)}</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:10px">
-        <div style="font-size:9px;font-weight:700;color:var(--ink4);margin-bottom:4px">TALUKA</div>
-        <div style="font-size:13px;font-weight:700">${h(r.taluka)}</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:10px">
-        <div style="font-size:9px;font-weight:700;color:var(--ink4);margin-bottom:4px">OPERATOR</div>
-        <div style="font-size:12px;font-weight:600">${h(r.operator||'—')}</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:10px">
-        <div style="font-size:9px;font-weight:700;color:var(--ink4);margin-bottom:4px">CONTACT</div>
-        <div style="font-size:12px;font-weight:600">${r.contact_phone?`<a href="tel:+91${h(r.contact_phone.replace(/\D/g,''))}" style="color:var(--teal-d)">${h(r.contact_phone)}</a>`:h(r.contact_name||'—')}</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button onclick="closeMobSheet();switchTab('pipeline');plStage=stageOf(DATA.find(d=>d.rvm_id==='${esc(r.rvm_id)}')||{}).key;renderPipelineStageTabs();renderPipeline()" style="flex:1;padding:11px;background:var(--bg3);border:1.5px solid var(--line);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">🔄 View in Pipeline</button>
-      <button onclick="closeMobSheet();selID='${esc(r.rvm_id)}';switchMRT('update');prepUpdDrop();switchTab('map')" style="flex:1;padding:11px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">✏️ Update Stage</button>
+
+    <!-- HISTORY TAB -->
+    <div class="mob-tab-pane" id="mtp-history">
+      ${upds.length===0
+        ? '<div style="text-align:center;padding:32px 16px;color:var(--ink4);font-size:13px">No updates yet.<br>Use the Update tab to add notes.</div>'
+        : upds.slice().reverse().map((u,i)=>{
+            const si=STAGES.find(st=>st.label===u.stage)||{hex:'#94a3b8',lhex:'#f1f5f9'};
+            const reasonPills=(u.delayReasons||[]).map(rr=>`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:${si.hex}18;color:${si.hex}">${h(rr)}</span>`).join('');
+            const ts=u.ts?new Date(u.ts).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}):'';
+            return`<div style="padding:12px 0;border-bottom:1px solid var(--line);position:relative">
+              ${i===0?'<span style="position:absolute;top:12px;right:0;font-size:8px;font-weight:700;background:var(--teal-l);color:var(--teal-d);padding:2px 7px;border-radius:6px">LATEST</span>':''}
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:16px;background:${si.lhex};color:${si.hex}">${h(u.stage)}</span>
+                <span style="font-size:10px;color:var(--ink4);font-family:'JetBrains Mono',monospace">${h(u.date||'')}</span>
+              </div>
+              ${u.notes?`<div style="font-size:13px;color:var(--ink2);background:var(--bg3);padding:10px 12px;border-radius:8px;border-left:3px solid var(--teal);line-height:1.5;margin-bottom:6px">💬 ${h(u.notes)}</div>`:''}
+              ${reasonPills?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px">${reasonPills}</div>`:''}
+              ${u.delayReschedule?`<div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px">📅 Rescheduled → ${h(u.delayReschedule)}</div>`:''}
+              <div style="font-size:11px;color:var(--ink4)">${u.by?'👤 '+h(u.by)+' · ':''}${ts}</div>
+            </div>`;
+          }).join('')
+      }
     </div>`;
+
   document.getElementById('mob-sheet').classList.add('open');
   document.getElementById('mob-overlay').classList.add('on');
   document.body.style.overflow='hidden';
+}
+
+// Mobile sheet tab switcher
+function mobSwitchTab(tab, btn){
+  document.querySelectorAll('.mob-tab').forEach(b=>b.classList.remove('act'));
+  document.querySelectorAll('.mob-tab-pane').forEach(p=>p.classList.remove('on'));
+  if(btn) btn.classList.add('act');
+  const pane=document.getElementById('mtp-'+tab);
+  if(pane) pane.classList.add('on');
+}
+function mobSwitchTabBtn(tab){
+  // Switch tab programmatically (from button click inside pane)
+  const tabs=document.querySelectorAll('.mob-tab');
+  const panes=document.querySelectorAll('.mob-tab-pane');
+  tabs.forEach(b=>b.classList.remove('act'));
+  panes.forEach(p=>p.classList.remove('on'));
+  const idx=['info','update','history'].indexOf(tab);
+  if(tabs[idx]) tabs[idx].classList.add('act');
+  const pane=document.getElementById('mtp-'+tab);
+  if(pane) pane.classList.add('on');
+}
+
+// Submit update from mobile sheet
+function submitMobUpdate(rvm_id){
+  const stage=document.getElementById('mob-upd-stage')?.value;
+  const date=document.getElementById('mob-upd-date')?.value;
+  const notes=document.getElementById('mob-upd-notes')?.value||'';
+  const by=document.getElementById('mob-upd-by')?.value?.trim();
+  if(!stage){toast('Please select a stage','warn');return;}
+  if(!by){
+    const el=document.getElementById('mob-upd-by');
+    if(el){el.style.borderColor='var(--red)';el.focus();}
+    toast('Your name is required','warn');return;
+  }
+  if(!LOCAL[rvm_id])LOCAL[rvm_id]={};
+  if(!LOCAL[rvm_id].updates)LOCAL[rvm_id].updates=[];
+  const reasons=getDelayReasons('mob');
+  const resched=document.getElementById('mob-upd-resched')?.value||'';
+  LOCAL[rvm_id].updates.push({stage,date,notes,by,delayReasons:reasons,delayReschedule:resched,ts:new Date().toISOString()});
+  if(reasons.length){LOCAL[rvm_id].delayReasons=reasons;LOCAL[rvm_id].delayReschedule=resched;}
+  if(resched){const r=DATA.find(d=>d.rvm_id===rvm_id);if(r&&!r.rvm_installed)r.planned_install_date=resched;}
+  // Update stage in DATA
+  const r=DATA.find(d=>d.rvm_id===rvm_id);
+  if(r){
+    const s=STAGES.find(st=>st.label===stage);
+    r.current_stage=stage;
+    if(s&&date){if(s.key==='planned_install_date')r.planned_install_date=date;else r[s.key]=date;}
+  }
+  if(by) localStorage.setItem('rvm_updater_name',by);
+  // Clear chips
+  clearDChips('mob');
+  const oc=document.getElementById('mob-other-chips');if(oc)oc.innerHTML='';
+  const oi=document.getElementById('mob-other-reason');if(oi)oi.value='';
+  // Show success
+  const ok=document.getElementById('mob-upd-ok');
+  if(ok){ok.style.display='block';setTimeout(()=>{ok.style.display='none';},2500);}
+  // Refresh ALL dashboard sections so data is in sync
+  updateStats();
+  renderOverview();
+  updatePolyStyles();
+  drawMarkers();
+  renderMapPList();
+  renderMapStageFilter();
+  updateOverdueBadge();
+  setLastUpdated();
+  renderRescheduleTracker();
+  renderActivityFeed();
+  renderPipeline();
+  renderPipelineStageTabs();
+  renderSchedule();
+  renderTable();
+  toast('Updated: '+rvm_id,'ok');
+  // Reopen sheet with updated data to show new history
+  setTimeout(()=>{
+    const updatedR=DATA.find(d=>d.rvm_id===rvm_id);
+    if(updatedR) openMobSheet(updatedR);
+  }, 300);
+}
+
+// Panchayat fullscreen picker
+function openMobPanchSheet(){
+  const el=document.getElementById('mob-panch-sheet');
+  if(!el) return;
+  el.classList.add('open');
+  document.body.style.overflow='hidden';
+  renderMobPanchList();
+  setTimeout(()=>document.getElementById('mps-search-inp')?.focus(), 300);
+}
+function closeMobPanchSheet(){
+  const el=document.getElementById('mob-panch-sheet');
+  if(el) el.classList.remove('open');
+  document.body.style.overflow='';
+}
+
+let _mobPanchMode='list'; // 'list' or 'rvms'
+let _mobCurPanch='';
+
+function renderMobPanchList(){
+  const q=(document.getElementById('mps-search-inp')?.value||'').trim().toLowerCase();
+  const list=document.getElementById('mps-list');
+  if(!list||!DATA.length){
+    if(list) list.innerHTML='<div style="text-align:center;padding:40px;color:var(--ink4)">Load data first</div>';
+    return;
+  }
+
+  // If showing RVM list for a panchayat
+  if(_mobPanchMode==='rvms'&&!q){
+    const rvms=DATA.filter(r=>r.panchayat===_mobCurPanch).sort((a,b)=>a.rvm_id.localeCompare(b.rvm_id));
+    list.innerHTML=`<div class="mps-back" onclick="_mobPanchMode='list';renderMobPanchList()">← All Panchayats <span style="margin-left:auto;font-size:11px;color:var(--ink4)">${rvms.length} RVMs</span></div>`
+      + rvms.map(r=>{
+          const s=stageOf(r);
+          const upds=(LOCAL[r.rvm_id]||{}).updates||[];
+          return`<div class="mps-rvm" onclick="closeMobPanchSheet();selID='${esc(r.rvm_id)}';openMobSheet(DATA.find(d=>d.rvm_id==='${esc(r.rvm_id)}'))">
+            <div style="width:10px;height:10px;border-radius:50%;background:${s.hex};flex-shrink:0"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--teal-d)">${h(r.rvm_id)}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h(r.location_name)}</div>
+              <div style="font-size:11px;color:var(--ink4)">${h(r.operator||'—')}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+              <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:16px;background:${s.lhex};color:${s.hex}">${h(s.label)}</span>
+              ${upds.length?`<span style="font-size:9px;color:var(--teal-d);font-weight:600">📋 ${upds.length} note${upds.length>1?'s':''}</span>`:''}
+            </div>
+          </div>`;
+        }).join('');
+    return;
+  }
+
+  // Search mode OR default list — group by taluka
+  let rows=DATA;
+  if(q) rows=rows.filter(r=>
+    r.rvm_id.toLowerCase().includes(q)||
+    r.panchayat.toLowerCase().includes(q)||
+    r.location_name.toLowerCase().includes(q)||
+    r.taluka.toLowerCase().includes(q)
+  );
+
+  if(!rows.length){
+    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--ink4)">No results found</div>';
+    return;
+  }
+
+  if(q){
+    // Search result — show individual RVMs directly
+    const sorted=[...rows].sort((a,b)=>a.rvm_id.localeCompare(b.rvm_id));
+    list.innerHTML=sorted.map(r=>{
+      const s=stageOf(r);
+      const lo=r.rvm_id.toLowerCase();
+      let idHtml=h(r.rvm_id);
+      if(q&&lo.includes(q)){const st=lo.indexOf(q);idHtml=h(r.rvm_id.slice(0,st))+'<mark style="background:var(--amber-l);color:var(--amber);border-radius:2px">'+h(r.rvm_id.slice(st,st+q.length))+'</mark>'+h(r.rvm_id.slice(st+q.length));}
+      return`<div class="mps-rvm" onclick="closeMobPanchSheet();selID='${esc(r.rvm_id)}';openMobSheet(DATA.find(d=>d.rvm_id==='${esc(r.rvm_id)}'))">
+        <div style="width:10px;height:10px;border-radius:50%;background:${s.hex};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--teal-d)">${idHtml}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink)">${h(r.location_name)}</div>
+          <div style="font-size:11px;color:var(--ink4)">${h(r.panchayat)} · ${h(r.taluka)}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:14px;background:${s.lhex};color:${s.hex};flex-shrink:0">${h(s.label)}</span>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // Default — group by taluka → panchayat
+  const byTaluka={};
+  rows.forEach(r=>{
+    const t=r.taluka||'Other';
+    if(!byTaluka[t]) byTaluka[t]={};
+    if(!byTaluka[t][r.panchayat]) byTaluka[t][r.panchayat]=[];
+    byTaluka[t][r.panchayat].push(r);
+  });
+  list.innerHTML=Object.entries(byTaluka).sort((a,b)=>a[0].localeCompare(b[0])).map(([tal,panchs])=>{
+    const panchRows=Object.entries(panchs).sort((a,b)=>a[0].localeCompare(b[0]));
+    return`<div class="mps-group">
+      <div class="mps-taluka">${h(tal)} <span style="font-weight:400;opacity:.6">${panchRows.length} panchayats</span></div>
+      ${panchRows.map(([panch,rvms])=>{
+        const instCnt=rvms.filter(r=>r.rvm_installed).length;
+        const best=stageOf(rvms.reduce((b,r)=>STAGES.indexOf(stageOf(r))>STAGES.indexOf(stageOf(b))?r:b,rvms[0]));
+        return`<div class="mps-panch" onclick="_mobPanchMode='rvms';_mobCurPanch='${esc(panch)}';renderMobPanchList()">
+          <div style="width:10px;height:10px;border-radius:50%;background:${best.hex};flex-shrink:0"></div>
+          <div class="mps-panch-name">${h(panch)}</div>
+          <span style="font-size:10px;color:var(--green);font-weight:600;margin-right:4px">${instCnt>0?instCnt+'✅':''}</span>
+          <span class="mps-panch-cnt">${rvms.length} RVM${rvms.length>1?'s':''}</span>
+          <span style="color:var(--ink4);margin-left:4px;font-size:16px">›</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
 }
 function closeMobSheet(){
   document.getElementById('mob-sheet').classList.remove('open');
@@ -1442,7 +1796,7 @@ function stageGroup(r){return stageOf(r).group;}
 // ════════════════════════════════
 // Change ADMIN_HASH to hash of your own password
 // Generate at: https://emn178.github.io/online-tools/sha256.html
-const ADMIN_HASH='a2e06a7ca6f9c2def3ba466f2762fd1042157e720c40cdd2949a32e0bd5422ee'; // = "recykal2026"
+const ADMIN_HASH='a2e06a7ca6f9c2def3ba466f2762fd1042157e720c40cdd2949a32e0bd5422ee'; // = "recykal2024"
 const SESSION_KEY='rvm_admin_session';
 let _passCallback=null;
 
@@ -1555,6 +1909,20 @@ function clickPanchayat(name,feat){
   renderMapPList();
 }
 
+// ── COORDINATE RESOLVER ────────────────────────────────
+// Goa valid ranges: lat 14.5–16.0, lng 73.0–75.0
+// Auto-detects swapped columns and rejects out-of-range values
+function resolveCoords(rawLat, rawLng){
+  const a=parseFloat(String(rawLat||'').trim());
+  const b=parseFloat(String(rawLng||'').trim());
+  if(isNaN(a)||isNaN(b)||(a===0&&b===0)) return null;
+  const isLat=v=>v>=14.5&&v<=16.0;
+  const isLng=v=>v>=73.0&&v<=75.0;
+  if(isLat(a)&&isLng(b)) return {lat:a,lng:b};          // correct order
+  if(isLat(b)&&isLng(a)) return {lat:b,lng:a};          // swapped — auto-correct
+  return null;                                            // out-of-range — reject
+}
+
 function drawMarkers(){
   mapMarkers.forEach(m=>map.removeLayer(m));
   mapMarkers=[];
@@ -1571,7 +1939,7 @@ function drawMarkers(){
     if(!bLat||!bLng) return;
     rvms.forEach((r,i)=>{
       let lat=bLat,lng=bLng;
-      if(r.lat&&r.lng&&!isNaN(+r.lat)){lat=+r.lat;lng=+r.lng;}
+      const _rc=resolveCoords(r.lat,r.lng);if(_rc){lat=_rc.lat;lng=_rc.lng;}
       else if(rvms.length>1){const a=(i/rvms.length)*2*Math.PI;lat+=Math.sin(a)*.0015;lng+=Math.cos(a)*.0015;}
       const s=stageOf(r);const sel=selID===r.rvm_id;const sz=sel?22:12;
       const icon=L.divIcon({className:'',iconAnchor:[sz/2,sz+4],
@@ -1751,13 +2119,16 @@ function selectRVM(id){
 
 function flyToRVM(r){
   if(!map||!r) return;
-  // Use RVM's own lat/lng if set, otherwise use panchayat centroid
-  let lat=r.lat?+r.lat:0, lng=r.lng?+r.lng:0;
-  if(!lat||!lng){
-    const feat=GEO?.features.find(f=>normName(f.properties.name)===normName(r.panchayat));
-    lat=+(feat?.properties?.lat||0); lng=+(feat?.properties?.lng||0);
+  // Validated coord check — Goa range, auto-swap if swapped
+  const coords=resolveCoords(r.lat,r.lng);
+  if(coords){
+    map.flyTo([coords.lat,coords.lng],17,{duration:.6});
+    return;
   }
-  if(lat&&lng) map.flyTo([lat,lng],16,{duration:.6});
+  // Fallback: panchayat centroid
+  const feat=GEO?.features.find(f=>normName(f.properties.name)===normName(r.panchayat));
+  const fLat=+(feat?.properties?.lat||0),fLng=+(feat?.properties?.lng||0);
+  if(fLat&&fLng) map.flyTo([fLat,fLng],15,{duration:.6});
 }
 
 function showMRTabs(){document.getElementById('mr-tabs').style.display='flex';document.getElementById('mr-empty').style.display='none';}
@@ -2806,13 +3177,23 @@ function updateStats(){
   const agr=DATA.filter(r=>r.agreement_signed).length;
   const sched=DATA.filter(r=>r.planned_install_date&&!r.rvm_installed).length;
   const inst=DATA.filter(r=>r.rvm_installed).length;
+  const today=new Date().toISOString().slice(0,10);
+  const overdue=DATA.filter(r=>r.planned_install_date&&r.planned_install_date<today&&!r.rvm_installed).length;
   const pct=t>0?Math.round(inst/t*100):0;
+  // Desktop top bar
   setText('tk-total',fmt(t));
   setText('tk-noc',fmt(noc));
   setText('tk-agr',fmt(agr));
   setText('tk-sched',fmt(sched));
   setText('tk-inst',fmt(inst));
   setText('tk-pct',pct+'%');
+  // Mobile KPI strip in Overview
+  setText('mob-tk-total',fmt(t)||'0');
+  setText('mob-tk-noc',fmt(noc)||'0');
+  setText('mob-tk-inst',fmt(inst)||'0');
+  setText('mob-tk-sched',fmt(sched)||'0');
+  setText('mob-tk-overdue',fmt(overdue)||'0');
+  setText('mob-tk-pct',pct+'%');
 }
 
 // ════════════════════════════════
@@ -2833,8 +3214,19 @@ function switchTab(t){
   if(mobBtn) mobBtn.classList.add('act');
   // Mobile: show filter button only on map
   const mapFBtn=document.getElementById('map-filter-btn');
-  if(mapFBtn) mapFBtn.style.display=(t==='map'&&window.innerWidth<=768)?'block':'none';
-  if(t==='map'){initMap();setTimeout(()=>map&&map.invalidateSize(),150);drawMarkers();renderMapPList();renderMapStageFilter();}
+  if(mapFBtn) mapFBtn.style.display=(t==='map'&&window.innerWidth<=768)?'flex':'none';
+  if(t==='map'){
+    initMap();
+    setTimeout(()=>map&&map.invalidateSize(),150);
+    drawMarkers();renderMapPList();renderMapStageFilter();
+    // Mobile: show filter button, hide stale detail
+    if(window.innerWidth<=768){
+      const fb=document.getElementById('map-filter-btn');
+      if(fb) fb.style.display='flex';
+      // If no RVM selected, close any open mobile sheet
+      if(!selID) closeMobSheet();
+    }
+  }
   else if(t==='pipeline'){renderPipelineStageTabs();renderPipeline();}
   else if(t==='schedule') renderSchedule();
   else if(t==='table') renderTable();
@@ -3137,45 +3529,87 @@ function readXL(file){
 }
 function showErr(msg){const e=document.getElementById('gserr');e.style.display='block';e.textContent=msg;}
 function sheetId(u){const m=u.match(/\/d\/([a-zA-Z0-9_-]{20,})/);return m?m[1]:null;}
-function buildUrls(raw){const id=sheetId(raw);if(!id)return[];const sh='RVM Pipeline';return[`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sh)}`,`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&sheet=${encodeURIComponent(sh)}`,`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`];}
-async function tryFetch(url){const c=new AbortController();const t=setTimeout(()=>c.abort(),10000);try{const r=await fetch(url+'&_nc='+Date.now(),{mode:'cors',credentials:'omit',signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);const tx=await r.text();if(tx.trim().startsWith('<'))throw new Error('Got HTML — check sharing');if(tx.trim().length<10)throw new Error('Empty');return tx;}catch(e){clearTimeout(t);if(e.name==='AbortError')throw new Error('Timeout');throw e;}}
+function buildUrls(raw){
+  const id=sheetId(raw);if(!id)return[];
+  const sh='RVM Pipeline';
+  const enc=encodeURIComponent(sh);
+  const ts=Date.now();
+  return[
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${enc}&t=${ts}`,
+    `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&sheet=${enc}`,
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&t=${ts}`,
+  ];
+}
+
+async function tryFetch(url){
+  // Use XHR — more reliable than fetch() for Google Sheets CORS
+  return new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();
+    const timer=setTimeout(()=>{xhr.abort();reject(new Error('Timeout'));},15000);
+    xhr.open('GET',url,true);
+    xhr.onload=()=>{
+      clearTimeout(timer);
+      const txt=xhr.responseText||'';
+      if(xhr.status>=400) return reject(new Error('HTTP '+xhr.status+' — sheet may be private or URL wrong'));
+      if(!txt||txt.trim().length<5) return reject(new Error('Empty response from sheet'));
+      if(txt.trim().startsWith('<!')) return reject(new Error('Got HTML — sheet is not shared publicly'));
+      resolve(txt);
+    };
+    xhr.onerror=()=>{
+      clearTimeout(timer);
+      reject(new Error('Could not reach Google Sheets. Confirm the sheet is shared as "Anyone with the link → Viewer"'));
+    };
+    xhr.ontimeout=()=>{clearTimeout(timer);reject(new Error('Timeout'));};
+    xhr.send();
+  });
+}
+
 function parseCSV(csv){try{const lines=csv.split('\n').filter(l=>l.trim());if(!lines.length)return[];const hdr=splitL(lines[0]).map(h=>h.toLowerCase().replace(/[\s\-\/①②③④⑤⑥]+/g,'_').replace(/[^a-z0-9_]/g,'').replace(/^_+|_+$/g,''));const sh=hdr.map(h=>BLOCKED.has(h)?'_b':h);return lines.slice(1).map(line=>{const vals=splitL(line);const obj=Object.create(null);sh.forEach((h,i)=>obj[h]=(vals[i]||'').trim());return normRow(obj);}).filter(r=>r.rvm_id||r.location_name||r.panchayat).filter(r=>Object.values(r).some(v=>v!==''&&v!==null&&v!==undefined));}catch(e){return[];}}
 function splitL(line){const vals=[];let cur='',inQ=false;for(const c of line){if(c==='"')inQ=!inQ;else if(c===','&&!inQ){vals.push(cur);cur='';}else cur+=c;}vals.push(cur);return vals.map(v=>v.replace(/^"|"$/g,'').trim());}
 async function connectGS(){
   const raw=document.getElementById('gsurl').value.trim();
-  if(!raw){showErr('Please paste a Google Sheet URL.');return;}
+  if(!raw){showErr('Please paste your Google Sheet URL.');return;}
   if(!raw.includes('docs.google.com/spreadsheets')){
-    showErr('That doesn\'t look like a Google Sheet URL.\nIt should start with: https://docs.google.com/spreadsheets/d/...');return;
+    showErr('That does not look like a Google Sheet URL.\nIt should start with: https://docs.google.com/spreadsheets/d/...');return;
   }
+  const id=sheetId(raw);
+  if(!id){showErr('Could not extract Sheet ID from URL. Copy the URL directly from your browser address bar.');return;}
   const btn=document.getElementById('gsbtn');
   btn.textContent='Connecting…';btn.disabled=true;
   document.getElementById('gserr').style.display='none';
-  let lastErr='',lastType='';
-  for(const url of buildUrls(raw)){
+  const urls=buildUrls(raw);
+  let lastErr='';
+  for(const url of urls){
     try{
       const csv=await tryFetch(url);
       const p=parseCSV(csv);
-      if(!p.length){lastErr='No valid rows found.';lastType='norows';continue;}
+      if(!p.length){lastErr='Sheet loaded but no rows found. Check the tab is named exactly "RVM Pipeline".';continue;}
       localStorage.setItem('rvm_pipe_v3',raw);
       SHEET_URL=url;
-      loadData(p);showSheetIndicator(raw);
-      btn.textContent='Connect →';btn.disabled=false;
-      toast('✅ Connected — '+p.length+' RVMs loaded','ok');return;
+      loadData(p);
+      showSheetIndicator(raw);
+      btn.textContent='Connected ✓';btn.disabled=false;
+      toast('Connected — '+p.length+' RVMs loaded','ok');
+      return;
     }catch(e){
       lastErr=e.message;
-      if(e.message.includes('HTML')||e.message.includes('403')||e.message.includes('401')) lastType='private';
-      else if(e.message.includes('Timeout')) lastType='timeout';
-      else lastType='generic';
+      if(e.message.includes('HTML')||e.message.includes('not public')) break;
     }
   }
   btn.textContent='Connect Google Sheet →';btn.disabled=false;
-  const msgs={
-    private:'Sheet is not publicly accessible.\n\nTo fix: Open the sheet → Share (top right) → Change to "Anyone with the link" → Viewer → Done. Then try again.',
-    timeout:'Connection timed out. Check your internet and try again.',
-    norows:'Sheet connected but no data found.\n\nTo fix: Make sure the tab is named exactly "RVM Pipeline" (case-sensitive) and row 1 has the correct column headers.',
-    generic:'Could not load sheet.\n\nMake sure:\n• Tab is named "RVM Pipeline"\n• Sheet is shared as Anyone with link → Viewer\n\nError: '+lastErr,
-  };
-  showErr(msgs[lastType]||msgs.generic);
+  let errMsg='';
+  if(lastErr.includes('HTML')||lastErr.includes('not public')){
+    errMsg='Sheet is private.\n\nTo fix:\n1. Open your Google Sheet\n2. Click Share (top right)\n3. Under General Access → change to "Anyone with the link"\n4. Set role to "Viewer"\n5. Click Done, then try again here';
+  } else if(lastErr.includes('Network error')||lastErr.includes('Failed to fetch')){
+    errMsg='Network error — could not reach Google Sheets.\n\nCheck:\n• Your internet connection\n• Sheet is shared as "Anyone with the link → Viewer"\n• Try opening the sheet URL in a new browser tab first';
+  } else if(lastErr.includes('Timeout')){
+    errMsg='Connection timed out. Please try again.';
+  } else if(lastErr.includes('RVM Pipeline')||lastErr.includes('no rows')){
+    errMsg='Sheet connected but no data found.\n\nCheck:\n• Tab at the bottom is named exactly: RVM Pipeline\n• Row 1 has column headers\n• At least one data row exists below headers';
+  } else {
+    errMsg='Could not load sheet.\n\nMake sure:\n• Sheet is shared: Anyone with link → Viewer\n• Tab is named "RVM Pipeline"\n\nError: '+lastErr;
+  }
+  showErr(errMsg);
 }
 
 // ════════════════════════════════
@@ -3183,27 +3617,46 @@ async function connectGS(){
 // ════════════════════════════════
 (()=>{
   loadGeo();
-  if(SHEET_URL){
-    // Rebuild correct fetch URL from stored raw URL
-    const _savedRaw=localStorage.getItem('rvm_pipe_v3')||'';
-    const _builtUrls=buildUrls(_savedRaw||SHEET_URL);
-    const _fetchUrl=_builtUrls[0]||SHEET_URL;
-    SHEET_URL=_fetchUrl;
-    showSheetIndicator(_savedRaw||SHEET_URL);
-    const _gsEl=document.getElementById('gsurl');
-    if(_gsEl) _gsEl.value=(_savedRaw).replace(/\/gviz.*/,'/edit').replace(/\/export.*/,'/edit');
-    setSyncStatus('ok','Reconnecting…');
-    tryFetch(_fetchUrl)
+
+  // Auto-refresh helper
+  function _startAutoRefresh(){
+    if(syncTimer) return;
+    syncTimer=setInterval(()=>{
+      if(SHEET_URL) tryFetch(SHEET_URL).then(csv=>{const p=parseCSV(csv);if(p.length)loadData(p);}).catch(()=>{});
+    },300000);
+  }
+
+  // Load from any raw Google Sheet URL
+  function _loadFromUrl(rawUrl){
+    const urls=buildUrls(rawUrl);
+    const fetchUrl=urls[0]||rawUrl;
+    SHEET_URL=fetchUrl;
+    document.getElementById('overlay').style.display='none';
+    showSheetIndicator(rawUrl);
+    const el=document.getElementById('gsurl');
+    if(el) el.value=rawUrl.replace(/\/gviz.*/,'/edit').replace(/\/export.*/,'/edit');
+    setSyncStatus('ok','Loading…');
+    tryFetch(fetchUrl)
       .then(csv=>{
         const p=parseCSV(csv);
-        if(p.length){
-          loadData(p);
-          if(!syncTimer) syncTimer=setInterval(()=>{
-            tryFetch(SHEET_URL).then(csv2=>{const p2=parseCSV(csv2);if(p2.length)loadData(p2);}).catch(()=>{});
-          },300000);
-        } else setSyncStatus('err','Sheet connected — check tab is named "RVM Pipeline"');
+        if(p.length){loadData(p);_startAutoRefresh();}
+        else setSyncStatus('err','No data — check tab is named "RVM Pipeline"');
       })
-      .catch(()=>setSyncStatus('err','Could not reload — check sheet is public'));
+      .catch(()=>setSyncStatus('err','Sheet unavailable — check it is shared publicly'));
+  }
+
+  if(BAKED_SHEET_URL){
+    // BAKED URL set → everyone auto-loads, overlay never shown
+    _loadFromUrl(BAKED_SHEET_URL);
+  } else {
+    const _saved=localStorage.getItem('rvm_pipe_v3')||'';
+    if(_saved){
+      // Admin previously connected a sheet on this browser → restore it
+      _loadFromUrl(_saved);
+    } else {
+      // No sheet configured at all → show load screen (admin only)
+      document.getElementById('overlay').style.display='flex';
+    }
   }
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&DATA.length)document.getElementById('overlay').style.display='none';});
   document.addEventListener('visibilitychange',()=>{
@@ -3224,6 +3677,20 @@ async function connectGS(){
 @keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,.4)}65%{box-shadow:0 0 0 8px rgba(13,148,136,0)}}
 @keyframes si{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 </style>
+<!-- ── Mobile Panchayat Selector (fullscreen) ── -->
+<div id="mob-panch-sheet">
+  <div class="mps-header">
+    <button class="mps-close" onclick="closeMobPanchSheet()">←</button>
+    <div class="mps-title" id="mps-title">Select Panchayat</div>
+  </div>
+  <div class="mps-search">
+    <div style="position:relative">
+      <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.4">🔍</span>
+      <input id="mps-search-inp" type="search" placeholder="Search panchayat or RVM ID…" oninput="renderMobPanchList()" autocomplete="off">
+    </div>
+  </div>
+  <div class="mps-list" id="mps-list"></div>
+</div>
 <!-- ── Admin Password Gate ── -->
 <div id="pass-gate">
   <div id="pass-box">
